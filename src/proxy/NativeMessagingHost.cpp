@@ -17,6 +17,7 @@
 
 #include "NativeMessagingHost.h"
 #include <QCoreApplication>
+#include "core/Tools.h"
 
 #ifdef Q_OS_WIN
 #include <winsock2.h>
@@ -25,8 +26,9 @@
 NativeMessagingHost::NativeMessagingHost()
     : NativeMessagingBase(true)
 {
+    connect(this, SIGNAL(connect()), this, SLOT(connectSocket()));
+
     m_localSocket = new QLocalSocket();
-    m_localSocket->connectToServer(getLocalServerPath());
     m_localSocket->setReadBufferSize(NATIVE_MSG_MAX_LENGTH);
 
     int socketDesc = m_localSocket->socketDescriptor();
@@ -35,14 +37,17 @@ NativeMessagingHost::NativeMessagingHost()
         setsockopt(socketDesc, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char*>(&max), sizeof(max));
     }
 #ifdef Q_OS_WIN
-    m_running.store(true);
-    m_future = QtConcurrent::run(this, &NativeMessagingHost::readNativeMessages);
+    m_running.store(1);
+    m_future =
+        QtConcurrent::run(this, static_cast<void (NativeMessagingHost::*)()>(&NativeMessagingHost::readNativeMessages));
 #endif
     connect(m_localSocket, SIGNAL(readyRead()), this, SLOT(newLocalMessage()));
     connect(m_localSocket, SIGNAL(disconnected()), this, SLOT(deleteSocket()));
     connect(m_localSocket,
             SIGNAL(stateChanged(QLocalSocket::LocalSocketState)),
             SLOT(socketStateChanged(QLocalSocket::LocalSocketState)));
+
+    emit reconnect();
 }
 
 NativeMessagingHost::~NativeMessagingHost()
@@ -116,18 +121,32 @@ void NativeMessagingHost::newLocalMessage()
     }
 }
 
+void NativeMessagingHost::connectSocket()
+{
+    m_localSocket->connectToServer(getLocalServerPath());
+}
+
 void NativeMessagingHost::deleteSocket()
 {
-    if (m_notifier) {
+    qDebug("deleteSocket");
+    /*if (m_notifier) {
         m_notifier->setEnabled(false);
     }
     m_localSocket->deleteLater();
-    QCoreApplication::quit();
+    QCoreApplication::quit();*/
 }
+
 
 void NativeMessagingHost::socketStateChanged(QLocalSocket::LocalSocketState socketState)
 {
+#ifdef Q_OS_WIN
     if (socketState == QLocalSocket::UnconnectedState || socketState == QLocalSocket::ClosingState) {
         m_running.testAndSetOrdered(true, false);
+    }
+#endif
+    if (socketState == QLocalSocket::UnconnectedState) {
+        qDebug("Reconnect");
+        sleep(1000);
+        emit reconnect();
     }
 }

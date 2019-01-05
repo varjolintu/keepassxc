@@ -29,8 +29,12 @@ public:
 
 public slots:
     void newLocalMessage();
+    void connectSocket();
     void deleteSocket();
     void socketStateChanged(QLocalSocket::LocalSocketState socketState);
+
+signals:
+    void reconnect();
 
 private:
     void readNativeMessages() override;
