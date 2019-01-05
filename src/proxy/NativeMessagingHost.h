@@ -28,6 +28,7 @@ public:
     ~NativeMessagingHost() override;
 
 public slots:
+    void newConnection();
     void newLocalMessage();
     void connectSocket();
     void deleteSocket();

@@ -17,16 +17,36 @@
 
 #include "NativeMessagingHost.h"
 #include <QCoreApplication>
-#include "core/Tools.h"
+//#include "core/Tools.h"
 
 #ifdef Q_OS_WIN
 #include <winsock2.h>
 #endif
 
+namespace Tools {
+    void sleep(int ms)
+    {
+        Q_ASSERT(ms >= 0);
+
+        if (ms == 0) {
+            return;
+        }
+
+#ifdef Q_OS_WIN
+        Sleep(uint(ms));
+#else
+        timespec ts;
+        ts.tv_sec = ms / 1000;
+        ts.tv_nsec = (ms % 1000) * 1000 * 1000;
+        nanosleep(&ts, nullptr);
+#endif
+    }
+}
+
 NativeMessagingHost::NativeMessagingHost()
     : NativeMessagingBase(true)
 {
-    connect(this, SIGNAL(connect()), this, SLOT(connectSocket()));
+    connect(this, SIGNAL(reconnect()), this, SLOT(connectSocket()));
 
     m_localSocket = new QLocalSocket();
     m_localSocket->setReadBufferSize(NATIVE_MSG_MAX_LENGTH);
@@ -41,6 +61,8 @@ NativeMessagingHost::NativeMessagingHost()
     m_future =
         QtConcurrent::run(this, static_cast<void (NativeMessagingHost::*)()>(&NativeMessagingHost::readNativeMessages));
 #endif
+
+    connect(m_localSocket, SIGNAL(connected()), this, SLOT(newConnection()));
     connect(m_localSocket, SIGNAL(readyRead()), this, SLOT(newLocalMessage()));
     connect(m_localSocket, SIGNAL(disconnected()), this, SLOT(deleteSocket()));
     connect(m_localSocket,
@@ -79,7 +101,7 @@ void NativeMessagingHost::readLength()
     if (!std::cin.eof() && length > 0) {
         readStdIn(length);
     } else {
-        QCoreApplication::quit();
+        //QCoreApplication::quit();
     }
 }
 
@@ -121,6 +143,15 @@ void NativeMessagingHost::newLocalMessage()
     }
 }
 
+void NativeMessagingHost::newConnection()
+{
+    auto s = m_localSocket->socketDescriptor();
+    qDebug("New connection ID: %d", s);
+    /*if (m_notifier) {
+        m_notifier->setEnabled(true);
+    }*/
+}
+
 void NativeMessagingHost::connectSocket()
 {
     m_localSocket->connectToServer(getLocalServerPath());
@@ -128,17 +159,28 @@ void NativeMessagingHost::connectSocket()
 
 void NativeMessagingHost::deleteSocket()
 {
-    qDebug("deleteSocket");
     /*if (m_notifier) {
         m_notifier->setEnabled(false);
-    }
-    m_localSocket->deleteLater();
+    }*/
+    /*m_localSocket->deleteLater();
     QCoreApplication::quit();*/
 }
 
 
 void NativeMessagingHost::socketStateChanged(QLocalSocket::LocalSocketState socketState)
 {
+    QString state;
+
+    switch (socketState) {
+        case QLocalSocket::UnconnectedState: state = "QLocalSocket::UnconnectedState"; break;
+        case QLocalSocket::ConnectingState: state = "QLocalSocket::ConnectingState"; break;
+        case QLocalSocket::ConnectedState: state = "QLocalSocket::ConnectedState"; break;
+        case QLocalSocket::ClosingState: state = "QLocalSocket::ClosingState"; break;
+    }
+
+    auto s = m_localSocket->socketDescriptor();
+    qDebug("socketStateChanged %d to: %s", s, state.toStdString().c_str());
+
 #ifdef Q_OS_WIN
     if (socketState == QLocalSocket::UnconnectedState || socketState == QLocalSocket::ClosingState) {
         m_running.testAndSetOrdered(true, false);
@@ -146,7 +188,7 @@ void NativeMessagingHost::socketStateChanged(QLocalSocket::LocalSocketState sock
 #endif
     if (socketState == QLocalSocket::UnconnectedState) {
         qDebug("Reconnect");
-        sleep(1000);
+        Tools::sleep(1000);
         emit reconnect();
     }
 }
