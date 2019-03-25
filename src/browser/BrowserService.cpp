@@ -1131,6 +1131,58 @@ void BrowserService::raiseWindow(const bool force)
 #endif
 }
 
+QRegularExpression BrowserService::matchPatternToRegex(const QString& pattern)
+{
+    if (pattern.isEmpty()) {
+        return QRegularExpression("^(?:http|https|file|ftp|app):\\/\\/");
+    }
+
+    QRegularExpression matchPattern("^(\\*|\\w+)://(\\*|(?:\\*\\.)?(?:[^/*]+))?/(.*)$");
+    auto match = matchPattern.match(pattern);
+    if (!match.hasMatch()) {
+        qDebug("%s is not a valid MatchPattern", pattern.toStdString().c_str());
+        return {};
+    }
+
+    QString scheme = match.captured(1);
+    QString host = match.captured(2);
+    QString path = match.captured(3);
+    if (host.isEmpty()) {
+        qDebug("%s does not have a valid host", pattern.toStdString().c_str());
+        return {};
+    }
+
+    QString regex = "^" + (scheme == "*" ? "(\\w+)" : scheme) + "://";
+
+    if (host == "*") {
+        regex += "[^/]+?";
+    } else {
+        if (host.contains("*.")) {
+            regex += "[^/]*?";
+            host.remove(0, 2);
+        }
+        regex.append(host.replace(".", "\\."));
+    }
+
+    if (!path.isEmpty()) {
+        if (path == "*") {
+            regex += "(/.*)?";
+        } else if (path[0] != "/") {
+            regex += "/" + path.replace(".", "\\.").replace("*", ".*?") + "/?";
+        }
+    }
+
+    regex += "$";
+    qDebug("Regex: %s", regex.toStdString().c_str());
+    return QRegularExpression(regex);
+}
+
+bool BrowserService::siteMatch(const QString& site, const QString& url)
+{
+    auto regex = matchPatternToRegex(site);
+    return regex.match(url).hasMatch();
+}
+
 void BrowserService::databaseLocked(DatabaseWidget* dbWidget)
 {
     if (dbWidget) {

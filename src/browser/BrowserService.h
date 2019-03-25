@@ -24,6 +24,7 @@
 #include "gui/DatabaseTabWidget.h"
 #include <QObject>
 #include <QtCore>
+#include <QRegularExpression>
 
 typedef QPair<QString, QString> StringPair;
 typedef QList<StringPair> StringPairList;
@@ -128,6 +129,8 @@ private:
     bool checkLegacySettings();
     void hideWindow() const;
     void raiseWindow(const bool force = false);
+    QRegularExpression matchPatternToRegex(const QString& pattern);
+    bool siteMatch(const QString& site, const QString& url);
 
 private:
     DatabaseTabWidget* const m_dbTabWidget;
