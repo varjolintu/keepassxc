@@ -44,6 +44,7 @@ private:
 
 private:
     QLocalSocket* m_localSocket;
+    bool m_connected;
 
     Q_DISABLE_COPY(NativeMessagingHost)
 };

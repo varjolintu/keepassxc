@@ -17,7 +17,7 @@
 
 #include "NativeMessagingHost.h"
 #include <QCoreApplication>
-//#include "core/Tools.h"
+#include "core/Tools.h"
 
 #ifdef Q_OS_WIN
 #include <winsock2.h>
@@ -45,6 +45,7 @@ namespace Tools {
 
 NativeMessagingHost::NativeMessagingHost()
     : NativeMessagingBase(true)
+    , m_connected(false)
 {
     connect(this, SIGNAL(reconnect()), this, SLOT(connectSocket()));
 
@@ -101,7 +102,7 @@ void NativeMessagingHost::readLength()
     if (!std::cin.eof() && length > 0) {
         readStdIn(length);
     } else {
-        //QCoreApplication::quit();
+        QCoreApplication::quit();
     }
 }
 
@@ -123,7 +124,7 @@ bool NativeMessagingHost::readStdIn(const quint32 length)
         arr.append(static_cast<char>(c));
     }
 
-    if (arr.length() > 0 && m_localSocket && m_localSocket->state() == QLocalSocket::ConnectedState) {
+    if (arr.length() > 0 && m_connected && m_localSocket && m_localSocket->state() == QLocalSocket::ConnectedState) {
         m_localSocket->write(arr.constData(), arr.length());
         m_localSocket->flush();
     }
@@ -147,9 +148,11 @@ void NativeMessagingHost::newConnection()
 {
     auto s = m_localSocket->socketDescriptor();
     qDebug("New connection ID: %d", s);
-    /*if (m_notifier) {
-        m_notifier->setEnabled(true);
-    }*/
+    
+    QJsonObject reply;
+    reply["action"] = "reconnected";
+    sendReply(reply);
+    m_connected = true;
 }
 
 void NativeMessagingHost::connectSocket()
@@ -164,6 +167,7 @@ void NativeMessagingHost::deleteSocket()
     }*/
     /*m_localSocket->deleteLater();
     QCoreApplication::quit();*/
+    m_connected = false;
 }
 
 
