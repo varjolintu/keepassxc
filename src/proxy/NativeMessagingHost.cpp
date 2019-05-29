@@ -124,7 +124,7 @@ bool NativeMessagingHost::readStdIn(const quint32 length)
         arr.append(static_cast<char>(c));
     }
 
-    if (arr.length() > 0 && m_connected && m_localSocket && m_localSocket->state() == QLocalSocket::ConnectedState) {
+    if (arr.length() > 0 && isConnected() && m_localSocket && m_localSocket->isValid() && m_localSocket->state() == QLocalSocket::ConnectedState) {
         m_localSocket->write(arr.constData(), arr.length());
         m_localSocket->flush();
     }
@@ -147,7 +147,7 @@ void NativeMessagingHost::newLocalMessage()
 void NativeMessagingHost::newConnection()
 {
     auto s = m_localSocket->socketDescriptor();
-    qDebug("New connection ID: %d", s);
+    qDebug("New connection ID: %lld", s);
     
     QJsonObject reply;
     reply["action"] = "reconnected";
@@ -183,16 +183,26 @@ void NativeMessagingHost::socketStateChanged(QLocalSocket::LocalSocketState sock
     }
 
     auto s = m_localSocket->socketDescriptor();
-    qDebug("socketStateChanged %d to: %s", s, state.toStdString().c_str());
+    qDebug("socketStateChanged %lld to: %s", s, state.toStdString().c_str());
 
-#ifdef Q_OS_WIN
+/*#ifdef Q_OS_WIN
     if (socketState == QLocalSocket::UnconnectedState || socketState == QLocalSocket::ClosingState) {
         m_running.testAndSetOrdered(true, false);
     }
-#endif
+#endif*/
     if (socketState == QLocalSocket::UnconnectedState) {
         qDebug("Reconnect");
+
+        QJsonObject quitMessage;
+        quitMessage["action"] = "disconnected";
+        sendReply(quitMessage);
+
         Tools::sleep(1000);
         emit reconnect();
     }
+}
+
+bool NativeMessagingHost::isConnected() const
+{
+    return m_connected;
 }

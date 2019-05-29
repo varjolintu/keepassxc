@@ -41,10 +41,11 @@ private:
     void readNativeMessages() override;
     void readLength() override;
     bool readStdIn(const quint32 length) override;
+    bool isConnected() const;
 
 private:
     QLocalSocket* m_localSocket;
-    bool m_connected;
+    std::atomic<bool> m_connected;
 
     Q_DISABLE_COPY(NativeMessagingHost)
 };
