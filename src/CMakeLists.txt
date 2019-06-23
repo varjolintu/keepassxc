@@ -172,7 +172,8 @@ if(APPLE)
             core/MacPasteboard.cpp
             gui/macutils/MacUtils.cpp
             gui/macutils/AppKitImpl.mm
-            gui/macutils/AppKit.h)
+            gui/macutils/AppKit.h
+            gui/SecureLineEdit.mm)
 endif()
 if(UNIX AND NOT APPLE)
     set(keepassx_SOURCES
