@@ -28,66 +28,50 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SecureLineEditWrapperImpl: NSObject
+@interface SecureLineEditImpl: NSObject
 {
-    SecureLineEditWrapper* wrapper;
+    SecureLineEdit* m_wrapper;
 }
 
+- (id) initWithObject:(SecureLineEdit *)wrapper;
 - (void)controlTextDidChange:(NSNotification *)obj;
+- (bool) isEnabled;
 
 @end
 
-@implementation SecureLineEditWrapperImpl
+@implementation SecureLineEditImpl
+
+- (id) initWithObject:(SecureLineEdit *)wrapper
+{
+    self = [super init];
+    if (self) {
+        m_wrapper = wrapper;
+    }
+    return self;
+}
 
 - (void)controlTextDidChange:(NSNotification *)obj
 {
     NSSecureTextField *textField = [obj object];
     NSString *value = [textField stringValue];
-    wrapper->handleTextChanged(QString::fromNSString(value));
+    m_wrapper->handleTextChanged(QString::fromNSString(value));
 }
 
-SecureLineEditWrapper::SecureLineEditWrapper(QWidget* parent)
-    : QMacCocoaViewContainer(nullptr, parent)
+- (bool) isEnabled
 {
-    self = [[SecureLineEditWrapperImpl alloc] init];
-
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    m_ref = [[NSSecureTextField alloc] init];
-    setCocoaView(m_ref);
-
-    [[NSNotificationCenter defaultCenter] addObserver:static_cast<id>(self)
-                                          selector:@selector(controlTextDidChange:)
-                                          name:NSControlTextDidChangeNotification
-                                          object:nil];
-
-    [m_ref release];
-    [pool release];
+    return false;
 }
 
-SecureLineEditWrapper::~SecureLineEditWrapper()
+/*- (NSString) text
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:static_cast<id>(m_ref)];
-    [static_cast<id>(self) dealloc];
-}
-
-void SecureLineEditWrapper::handleTextChanged(QString value)
-{
-    Q_UNUSED(value);
-    qDebug("Text changed.");
-    //emit textChanged(value); // Emit signal to QLineEdit (Crashes)
-}
-
-@end
+   
+}*/
 
 SecureLineEdit::SecureLineEdit(QWidget* parent)
-    : QLineEdit(parent)
+    : QMacCocoaViewContainer(nullptr, parent)
     , m_clearButton(new QToolButton(this))
 {
-    m_wrapper = new SecureLineEditWrapper(parent);
-
     m_clearButton->setObjectName("clearButton");
-
     QIcon icon;
     QString iconNameDirected =
         QString("edit-clear-locationbar-").append((layoutDirection() == Qt::LeftToRight) ? "rtl" : "ltr");
@@ -107,22 +91,49 @@ SecureLineEdit::SecureLineEdit(QWidget* parent)
     connect(this, SIGNAL(textChanged(QString)), this, SLOT(updateCloseButton(QString)));
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
     setStyleSheet(
-        QString("QLineEdit { padding-right: %1px; } ").arg(m_clearButton->sizeHint().width() + frameWidth + 1));
+        QString("QMacCocoaViewContainer { padding-right: %1px; } ").arg(m_clearButton->sizeHint().width() + frameWidth + 1));
     QSize msz = minimumSizeHint();
     setMinimumSize(qMax(msz.width(), m_clearButton->sizeHint().height() + frameWidth * 2 + 2),
                    qMax(msz.height(), m_clearButton->sizeHint().height() + frameWidth * 2 + 2));
+
+    // Cocoa
+    self = [[SecureLineEditImpl alloc] initWithObject:this];
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    m_ref = [[NSSecureTextField alloc] init];
+    setCocoaView(m_ref);
+
+    [[NSNotificationCenter defaultCenter] addObserver:static_cast<id>(self)
+                                          selector:@selector(controlTextDidChange:)
+                                          name:NSControlTextDidChangeNotification
+                                          object:nil];
+
+    [m_ref release];
+    [pool release];
+}
+
+SecureLineEdit::~SecureLineEdit()
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:static_cast<id>(m_ref)];
+    [static_cast<id>(self) dealloc];
+}
+
+void SecureLineEdit::handleTextChanged(QString value)
+{
+    emit textChanged(value);
 }
 
 void SecureLineEdit::moveEvent(QMoveEvent *event)
 {
-    // TODO: Fix this.
-    /*NSRect frame;
-    frame = [m_wrapper->m_ref frame];
+    // Fix this. Causes flickering.
+    NSRect frame;
+    frame = [m_ref frame];
     frame.origin.x = event->pos().x();
     frame.origin.y = event->pos().y();
-    [m_wrapper->m_ref setFrame:frame];*/
+    [m_ref setFrame:frame];
 
-    QLineEdit::moveEvent(event);
+    QMacCocoaViewContainer::moveEvent(event);
 }
 
 void SecureLineEdit::resizeEvent(QResizeEvent* event)
@@ -138,15 +149,65 @@ void SecureLineEdit::resizeEvent(QResizeEvent* event)
     }
 
     NSRect frame;
-    frame = [m_wrapper->m_ref frame];
+    frame = [m_ref frame];
     frame.size.width = event->size().width();
     frame.size.height = event->size().height();
-    [m_wrapper->m_ref setFrame:frame];
+    [m_ref setFrame:frame];
 
-    QLineEdit::resizeEvent(event);
+    QMacCocoaViewContainer::resizeEvent(event);
+}
+
+void SecureLineEdit::setEchoMode(QLineEdit::EchoMode)
+{
+
+}
+
+void SecureLineEdit::setReadOnly(bool)
+{
+
+}
+
+void SecureLineEdit::setMaxLength(int)
+{
+
+}
+
+void SecureLineEdit::setEnabled(bool) {
+
+}
+
+void SecureLineEdit::setFont(const QFont&) {
+
+}
+
+void SecureLineEdit::setText(const QString&)
+{
+
+}
+
+QLineEdit::EchoMode SecureLineEdit::echoMode() const
+{
+    return {};
+}
+
+bool SecureLineEdit::isEnabled() const
+{
+    return m_ref.enabled;
+}
+
+void SecureLineEdit::clear()
+{
+    [m_ref setStringValue: @""];
 }
 
 void SecureLineEdit::updateCloseButton(const QString& text)
 {
     m_clearButton->setVisible(!text.isEmpty());
 }
+
+QString SecureLineEdit::text() const
+{
+    return QString::fromNSString(m_ref.stringValue);
+}
+
+@end

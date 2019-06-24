@@ -35,41 +35,43 @@ typedef void *NativeNSSecureTextFieldRef;
 typedef const void *ConstNativeNSSecureTextFieldRef;
 #endif
 
-class SecureLineEditWrapper : public QMacCocoaViewContainer
-{
-    Q_OBJECT
-
-public:
-    explicit SecureLineEditWrapper(QWidget* parent = nullptr);
-    ~SecureLineEditWrapper();
-
-    void handleTextChanged(QString value);
-
-signals:
-    void textChanged(const QString&);
-
-public:
-    NativeNSSecureTextFieldRef m_ref;
-    void* self;
-};
-
-class SecureLineEdit : public QLineEdit
+class SecureLineEdit : public QMacCocoaViewContainer
 {
     Q_OBJECT
 
 public:
     explicit SecureLineEdit(QWidget* parent = nullptr);
+    ~SecureLineEdit();
+
+    void handleTextChanged(QString value);
+
+    void setEchoMode(QLineEdit::EchoMode);
+    void setReadOnly(bool);
+    void setMaxLength(int);
+    void setEnabled(bool);
+    void setFont(const QFont&);
+    void setText(const QString&);
+    QString text() const;
+    QLineEdit::EchoMode echoMode() const;
+    bool isEnabled() const;
 
 protected:
     void moveEvent(QMoveEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
+
+signals:
+    void textChanged(const QString&);
+
+public slots:
+    void clear();
 
 private slots:
     void updateCloseButton(const QString& text);
 
 private:
     QToolButton* const m_clearButton;
-    SecureLineEditWrapper* m_wrapper;
+    NativeNSSecureTextFieldRef m_ref;
+    void* self;
 };
 
 #endif // KEEPASSX_SECURELINEEDIT_H
