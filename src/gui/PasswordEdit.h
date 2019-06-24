@@ -22,7 +22,13 @@
 #include <QLineEdit>
 #include <QPointer>
 
+#ifdef Q_OS_MACOS
+#include "gui/macutils/SecureLineEdit.h"
+
+class PasswordEdit : public SecureLineEdit
+#else
 class PasswordEdit : public QLineEdit
+#endif
 {
     Q_OBJECT
 

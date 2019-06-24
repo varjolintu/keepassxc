@@ -22,20 +22,63 @@
 
 #include <QStyle>
 #include <QToolButton>
+#include <QResizeEvent>
 
 #include "core/FilePath.h"
 
 #import <Cocoa/Cocoa.h>
 
-SecureLineEditWrapper::SecureLineEditWrapper(QWidget* parent)
-    : QMacCocoaViewContainer(0, parent)
+@interface SecureLineEditWrapperImpl: NSObject
 {
+    SecureLineEditWrapper* wrapper;
+}
+
+- (void)controlTextDidChange:(NSNotification *)obj;
+
+@end
+
+@implementation SecureLineEditWrapperImpl
+
+- (void)controlTextDidChange:(NSNotification *)obj
+{
+    NSSecureTextField *textField = [obj object];
+    NSString *value = [textField stringValue];
+    wrapper->handleTextChanged(QString::fromNSString(value));
+}
+
+SecureLineEditWrapper::SecureLineEditWrapper(QWidget* parent)
+    : QMacCocoaViewContainer(nullptr, parent)
+{
+    self = [[SecureLineEditWrapperImpl alloc] init];
+
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
     m_ref = [[NSSecureTextField alloc] init];
     setCocoaView(m_ref);
 
+    [[NSNotificationCenter defaultCenter] addObserver:static_cast<id>(self)
+                                          selector:@selector(controlTextDidChange:)
+                                          name:NSControlTextDidChangeNotification
+                                          object:nil];
+
+    [m_ref release];
     [pool release];
 }
+
+SecureLineEditWrapper::~SecureLineEditWrapper()
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:static_cast<id>(m_ref)];
+    [static_cast<id>(self) dealloc];
+}
+
+void SecureLineEditWrapper::handleTextChanged(QString value)
+{
+    Q_UNUSED(value);
+    qDebug("Text changed.");
+    //emit textChanged(value); // Emit signal to QLineEdit (Crashes)
+}
+
+@end
 
 SecureLineEdit::SecureLineEdit(QWidget* parent)
     : QLineEdit(parent)
@@ -70,6 +113,18 @@ SecureLineEdit::SecureLineEdit(QWidget* parent)
                    qMax(msz.height(), m_clearButton->sizeHint().height() + frameWidth * 2 + 2));
 }
 
+void SecureLineEdit::moveEvent(QMoveEvent *event)
+{
+    // TODO: Fix this.
+    /*NSRect frame;
+    frame = [m_wrapper->m_ref frame];
+    frame.origin.x = event->pos().x();
+    frame.origin.y = event->pos().y();
+    [m_wrapper->m_ref setFrame:frame];*/
+
+    QLineEdit::moveEvent(event);
+}
+
 void SecureLineEdit::resizeEvent(QResizeEvent* event)
 {
     QSize sz = m_clearButton->sizeHint();
@@ -82,13 +137,13 @@ void SecureLineEdit::resizeEvent(QResizeEvent* event)
         m_clearButton->move(rect().left() + frameWidth, y);
     }
 
-    QLineEdit::resizeEvent(event); // Remove?
-
-    /*NSRect frame;
+    NSRect frame;
     frame = [m_wrapper->m_ref frame];
     frame.size.width = event->size().width();
     frame.size.height = event->size().height();
-    [m_wrapper->m_ref setFrame:frame];*/
+    [m_wrapper->m_ref setFrame:frame];
+
+    QLineEdit::resizeEvent(event);
 }
 
 void SecureLineEdit::updateCloseButton(const QString& text)

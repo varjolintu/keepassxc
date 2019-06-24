@@ -24,8 +24,6 @@
 #include <QMacCocoaViewContainer>
 #include <QLineEdit>
 
-#import <AppKit/NSSecureTextField.h>
-
 class QToolButton;
 
 #ifdef __OBJC__
@@ -33,24 +31,26 @@ class QToolButton;
 typedef NSSecureTextField *NativeNSSecureTextFieldRef;
 typedef const NSSecureTextField *ConstNativeNSSecureTextFieldRef;
 #else
-typedef void* NativeNSSecureTextFieldRef;
-typedef const void* ConstNativeNSSecureTextFieldRef;
+typedef void *NativeNSSecureTextFieldRef;
+typedef const void *ConstNativeNSSecureTextFieldRef;
 #endif
 
 class SecureLineEditWrapper : public QMacCocoaViewContainer
 {
     Q_OBJECT
+
 public:
-    explicit SecureLineEditWrapper(QWidget *parent = 0);
-    //void handleClicked();
+    explicit SecureLineEditWrapper(QWidget* parent = nullptr);
+    ~SecureLineEditWrapper();
+
+    void handleTextChanged(QString value);
 
 signals:
-    //void clicked();
-
-public slots:
+    void textChanged(const QString&);
 
 public:
     NativeNSSecureTextFieldRef m_ref;
+    void* self;
 };
 
 class SecureLineEdit : public QLineEdit
@@ -61,6 +61,7 @@ public:
     explicit SecureLineEdit(QWidget* parent = nullptr);
 
 protected:
+    void moveEvent(QMoveEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
 
 private slots:

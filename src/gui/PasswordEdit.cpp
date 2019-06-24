@@ -25,7 +25,11 @@ const QColor PasswordEdit::CorrectSoFarColor = QColor(255, 205, 15);
 const QColor PasswordEdit::ErrorColor = QColor(255, 125, 125);
 
 PasswordEdit::PasswordEdit(QWidget* parent)
+#ifdef Q_OS_MACOS
+    : SecureLineEdit(parent)
+#else
     : QLineEdit(parent)
+#endif
     , m_basePasswordEdit(nullptr)
 {
     setEchoMode(QLineEdit::Password);

@@ -173,7 +173,7 @@ if(APPLE)
             gui/macutils/MacUtils.cpp
             gui/macutils/AppKitImpl.mm
             gui/macutils/AppKit.h
-            gui/SecureLineEdit.mm)
+            gui/macutils/SecureLineEdit.mm)
 endif()
 if(UNIX AND NOT APPLE)
     set(keepassx_SOURCES
