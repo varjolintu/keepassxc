@@ -115,18 +115,6 @@ void NativeMessagingProxy::setupLocalSocket()
             SLOT(socketStateChanged(QLocalSocket::LocalSocketState)));
 
     emit reconnect();
-/*
-    m_localSocket->connectToServer(BrowserShared::localServerPath());
-    m_localSocket->setReadBufferSize(BrowserShared::NATIVEMSG_MAX_LENGTH);
-    int socketDesc = m_localSocket->socketDescriptor();
-    if (socketDesc) {
-        int max = BrowserShared::NATIVEMSG_MAX_LENGTH;
-        setsockopt(socketDesc, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char*>(&max), sizeof(max));
-    }
-
-    connect(m_localSocket.data(), SIGNAL(readyRead()), this, SLOT(transferSocketMessage()));
-    connect(m_localSocket.data(), SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
-*/
 }
 
 void NativeMessagingProxy::transferSocketMessage()
@@ -154,7 +142,7 @@ void NativeMessagingProxy::connectSocket()
     }
 
     connect(m_localSocket.data(), SIGNAL(readyRead()), this, SLOT(transferSocketMessage()));
-    connect(m_localSocket.data(), SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+    connect(m_localSocket.data(), SIGNAL(disconnected()), m_localSocket.data(), SLOT(deleteLater()));
 }
 
 void NativeMessagingProxy::newConnection()
@@ -165,22 +153,6 @@ void NativeMessagingProxy::newConnection()
     QJsonObject reply;
     reply["action"] = "reconnected";
     sendReply(reply);
-}
-
-void NativeMessagingProxy::socketDisconnected()
-{
-    // Shutdown the proxy when disconnected from the application
-    //QCoreApplication::quit();
-    //qDebug() << "Socket disconnected";
-
-    /*qDebug() << "Reconnect";
-
-    QJsonObject quitMessage;
-    quitMessage["action"] = "disconnected";
-    std::cout << jsonToString(quitMessage).toUtf8().toStdString() << std::flush;
-
-    Tools::sleep(1000);
-    emit reconnect();*/
 }
 
 void NativeMessagingProxy::socketStateChanged(QLocalSocket::LocalSocketState socketState)
@@ -195,7 +167,7 @@ void NativeMessagingProxy::socketStateChanged(QLocalSocket::LocalSocketState soc
     }
 
     auto s = m_localSocket->socketDescriptor();
-    qDebug("socketStateChanged %lld to: %s", s, state.toStdString().c_str());
+    qDebug() << "socketStateChanged " << s << " to: "<<  state.toStdString().c_str();
 
     if (socketState == QLocalSocket::UnconnectedState) {
         qDebug() << "Reconnect";
@@ -204,6 +176,7 @@ void NativeMessagingProxy::socketStateChanged(QLocalSocket::LocalSocketState soc
         quitMessage["action"] = "disconnected";
         sendReply(quitMessage);
 
+        m_localSocket->deleteLater(); // We no longer need the socket
         Tools::sleep(1000);
         emit reconnect();
     }

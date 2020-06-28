@@ -41,7 +41,6 @@ public slots:
     void transferStdinMessage(const QString& msg);
     void connectSocket();
     void newConnection();
-    void socketDisconnected();
     void socketStateChanged(QLocalSocket::LocalSocketState socketState);
 
 private:
