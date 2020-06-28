@@ -33,9 +33,30 @@
 #include <sys/types.h>
 #endif
 
+namespace Tools {
+    void sleep(int ms)
+    {
+        Q_ASSERT(ms >= 0);
+
+        if (ms == 0) {
+            return;
+        }
+
+#ifdef Q_OS_WIN
+        Sleep(uint(ms));
+#else
+        timespec ts;
+        ts.tv_sec = ms / 1000;
+        ts.tv_nsec = (ms % 1000) * 1000 * 1000;
+        nanosleep(&ts, nullptr);
+#endif
+    }
+}
+
 NativeMessagingProxy::NativeMessagingProxy()
     : QObject()
 {
+    connect(this, SIGNAL(reconnect()), this, SLOT(connectSocket()));
     connect(this,
             &NativeMessagingProxy::stdinMessage,
             this,
@@ -88,6 +109,13 @@ void NativeMessagingProxy::transferStdinMessage(const QString& msg)
 void NativeMessagingProxy::setupLocalSocket()
 {
     m_localSocket.reset(new QLocalSocket());
+    connect(m_localSocket.data(), SIGNAL(connected()), this, SLOT(newConnection()));
+    connect(m_localSocket.data(),
+            SIGNAL(stateChanged(QLocalSocket::LocalSocketState)),
+            SLOT(socketStateChanged(QLocalSocket::LocalSocketState)));
+
+    emit reconnect();
+/*
     m_localSocket->connectToServer(BrowserShared::localServerPath());
     m_localSocket->setReadBufferSize(BrowserShared::NATIVEMSG_MAX_LENGTH);
     int socketDesc = m_localSocket->socketDescriptor();
@@ -98,6 +126,7 @@ void NativeMessagingProxy::setupLocalSocket()
 
     connect(m_localSocket.data(), SIGNAL(readyRead()), this, SLOT(transferSocketMessage()));
     connect(m_localSocket.data(), SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+*/
 }
 
 void NativeMessagingProxy::transferSocketMessage()
@@ -113,8 +142,90 @@ void NativeMessagingProxy::transferSocketMessage()
     }
 }
 
+void NativeMessagingProxy::connectSocket()
+{
+    qDebug() << "Connecting...";
+    m_localSocket->connectToServer(BrowserShared::localServerPath());
+    m_localSocket->setReadBufferSize(BrowserShared::NATIVEMSG_MAX_LENGTH);
+    int socketDesc = m_localSocket->socketDescriptor();
+    if (socketDesc) {
+        int max = BrowserShared::NATIVEMSG_MAX_LENGTH;
+        setsockopt(socketDesc, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char*>(&max), sizeof(max));
+    }
+
+    connect(m_localSocket.data(), SIGNAL(readyRead()), this, SLOT(transferSocketMessage()));
+    connect(m_localSocket.data(), SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+}
+
+void NativeMessagingProxy::newConnection()
+{
+    auto s = m_localSocket->socketDescriptor();
+    qDebug() << "New connection ID:" << s;
+
+    QJsonObject reply;
+    reply["action"] = "reconnected";
+    sendReply(reply);
+}
+
 void NativeMessagingProxy::socketDisconnected()
 {
     // Shutdown the proxy when disconnected from the application
-    QCoreApplication::quit();
+    //QCoreApplication::quit();
+    //qDebug() << "Socket disconnected";
+
+    /*qDebug() << "Reconnect";
+
+    QJsonObject quitMessage;
+    quitMessage["action"] = "disconnected";
+    std::cout << jsonToString(quitMessage).toUtf8().toStdString() << std::flush;
+
+    Tools::sleep(1000);
+    emit reconnect();*/
+}
+
+void NativeMessagingProxy::socketStateChanged(QLocalSocket::LocalSocketState socketState)
+{
+    QString state;
+
+    switch (socketState) {
+        case QLocalSocket::UnconnectedState: state = "QLocalSocket::UnconnectedState"; break;
+        case QLocalSocket::ConnectingState: state = "QLocalSocket::ConnectingState"; break;
+        case QLocalSocket::ConnectedState: state = "QLocalSocket::ConnectedState"; break;
+        case QLocalSocket::ClosingState: state = "QLocalSocket::ClosingState"; break;
+    }
+
+    auto s = m_localSocket->socketDescriptor();
+    qDebug("socketStateChanged %lld to: %s", s, state.toStdString().c_str());
+
+    if (socketState == QLocalSocket::UnconnectedState) {
+        qDebug() << "Reconnect";
+
+        QJsonObject quitMessage;
+        quitMessage["action"] = "disconnected";
+        sendReply(quitMessage);
+
+        Tools::sleep(1000);
+        emit reconnect();
+    }
+}
+
+void NativeMessagingProxy::sendReply(const QJsonObject& json)
+{
+    if (!json.isEmpty()) {
+        sendReply(jsonToString(json));
+    }
+}
+
+void NativeMessagingProxy::sendReply(const QString& reply)
+{
+    if (!reply.isEmpty()) {
+        uint len = reply.size();
+        std::cout.write(reinterpret_cast<char*>(&len), sizeof(len));
+        std::cout << reply.toStdString() << std::flush;
+    }
+}
+
+QString NativeMessagingProxy::jsonToString(const QJsonObject& json) const
+{
+    return QString(QJsonDocument(json).toJson(QJsonDocument::Compact));
 }

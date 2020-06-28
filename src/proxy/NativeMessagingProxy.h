@@ -34,15 +34,22 @@ public:
 
 signals:
     void stdinMessage(QString msg);
+    void reconnect();
 
 public slots:
     void transferSocketMessage();
     void transferStdinMessage(const QString& msg);
+    void connectSocket();
+    void newConnection();
     void socketDisconnected();
+    void socketStateChanged(QLocalSocket::LocalSocketState socketState);
 
 private:
     void setupStandardInput();
     void setupLocalSocket();
+    void sendReply(const QJsonObject& json);
+    void sendReply(const QString& reply);
+    QString jsonToString(const QJsonObject& json) const;
 
 private:
     QScopedPointer<QLocalSocket> m_localSocket;
