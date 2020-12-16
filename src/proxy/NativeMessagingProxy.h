@@ -34,18 +34,30 @@ public:
 
 signals:
     void stdinMessage(QString msg);
+    void reconnect();
 
 public slots:
+    void newConnection();
+    void connectSocket();
     void transferSocketMessage();
     void transferStdinMessage(const QString& msg);
     void socketDisconnected();
+    void socketStateChanged(QLocalSocket::LocalSocketState socketState);
 
 private:
     void setupStandardInput();
     void setupLocalSocket();
 
 private:
+    enum ConnectionState
+    {
+        Connecting,
+        Connected,
+        Disconnected
+    };
+
     QScopedPointer<QLocalSocket> m_localSocket;
+    ConnectionState m_connectionState;
 
     Q_DISABLE_COPY(NativeMessagingProxy)
 };

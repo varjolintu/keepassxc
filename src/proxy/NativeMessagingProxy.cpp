@@ -33,9 +33,30 @@
 #include <sys/types.h>
 #endif
 
+namespace Tools {
+    void sleep(int ms)
+    {
+        Q_ASSERT(ms >= 0);
+
+        if (ms == 0) {
+            return;
+        }
+
+#ifdef Q_OS_WIN
+        Sleep(uint(ms));
+#else
+        timespec ts;
+        ts.tv_sec = ms / 1000;
+        ts.tv_nsec = (ms % 1000) * 1000 * 1000;
+        nanosleep(&ts, nullptr);
+#endif
+    }
+}
+
 NativeMessagingProxy::NativeMessagingProxy()
-    : QObject()
+    : QObject(), m_connectionState(Connecting)    // 0 = before connect, 1 = connected, 2 = disconnected
 {
+    connect(this, SIGNAL(reconnect()), this, SLOT(connectSocket()));
     connect(this,
             &NativeMessagingProxy::stdinMessage,
             this,
@@ -52,9 +73,9 @@ void NativeMessagingProxy::setupStandardInput()
     setmode(fileno(stdin), _O_BINARY);
     setmode(fileno(stdout), _O_BINARY);
 #endif
-
+    return;
     QtConcurrent::run([this] {
-        while (std::cin.good()) {
+        while (std::cin.good() && m_connectionState != ConnectionState::Disconnected) {
             if (std::cin.peek() != EOF) {
                 uint length = 0;
                 for (uint i = 0; i < sizeof(uint); ++i) {
@@ -69,8 +90,10 @@ void NativeMessagingProxy::setupStandardInput()
 
                 if (msg.length() > 0) {
                     emit stdinMessage(msg);
+                    qDebug() << "Received message: " << msg;
                 }
             }
+
             QThread::msleep(100);
         }
         QCoreApplication::quit();
@@ -88,7 +111,7 @@ void NativeMessagingProxy::transferStdinMessage(const QString& msg)
 void NativeMessagingProxy::setupLocalSocket()
 {
     m_localSocket.reset(new QLocalSocket());
-    m_localSocket->connectToServer(BrowserShared::localServerPath());
+    //m_localSocket->connectToServer(BrowserShared::localServerPath());
     m_localSocket->setReadBufferSize(BrowserShared::NATIVEMSG_MAX_LENGTH);
     int socketDesc = m_localSocket->socketDescriptor();
     if (socketDesc) {
@@ -96,8 +119,14 @@ void NativeMessagingProxy::setupLocalSocket()
         setsockopt(socketDesc, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char*>(&max), sizeof(max));
     }
 
+    connect(m_localSocket.data(), SIGNAL(connected()), this, SLOT(newConnection()));
     connect(m_localSocket.data(), SIGNAL(readyRead()), this, SLOT(transferSocketMessage()));
     connect(m_localSocket.data(), SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+    connect(m_localSocket.data(),
+            SIGNAL(stateChanged(QLocalSocket::LocalSocketState)),
+            SLOT(socketStateChanged(QLocalSocket::LocalSocketState)));
+
+    emit reconnect();
 }
 
 void NativeMessagingProxy::transferSocketMessage()
@@ -113,8 +142,57 @@ void NativeMessagingProxy::transferSocketMessage()
     }
 }
 
+void NativeMessagingProxy::newConnection()
+{
+    auto s = m_localSocket->socketDescriptor();
+    qDebug() << "New connection ID:" << s;
+
+    QString msg = "{\"action\":\"connected\"}";
+    uint len = msg.size();
+    std::cout.write(reinterpret_cast<char*>(&len), sizeof(len));
+    std::cout << msg.toStdString() << std::flush;
+
+    m_connectionState = ConnectionState::Connected;
+}
+
+void NativeMessagingProxy::connectSocket()
+{
+    qDebug() << "Connecting...";
+    m_localSocket->connectToServer(BrowserShared::localServerPath());
+}
+
 void NativeMessagingProxy::socketDisconnected()
 {
     // Shutdown the proxy when disconnected from the application
     QCoreApplication::quit();
+}
+
+void NativeMessagingProxy::socketStateChanged(QLocalSocket::LocalSocketState socketState)
+{
+    QString state;
+
+    switch (socketState) {
+        case QLocalSocket::UnconnectedState: state = "QLocalSocket::UnconnectedState"; break;
+        case QLocalSocket::ConnectingState: state = "QLocalSocket::ConnectingState"; break;
+        case QLocalSocket::ConnectedState: state = "QLocalSocket::ConnectedState"; break;
+        case QLocalSocket::ClosingState: state = "QLocalSocket::ClosingState"; break;
+    }
+
+    auto s = m_localSocket->socketDescriptor();
+    qDebug("socketStateChanged %lld to: %s", s, state.toStdString().c_str());
+    
+
+    if (socketState == QLocalSocket::UnconnectedState && m_connectionState == Connecting) {
+        qDebug() << "Not connected yet..";
+        QString msg = "{\"action\":\"not-connected-yet\"}";
+        uint len = msg.size();
+        std::cout.write(reinterpret_cast<char*>(&len), sizeof(len));
+        std::cout << msg.toStdString() << std::flush;
+
+        Tools::sleep(1000);
+        emit reconnect();
+    } else if (socketState == QLocalSocket::ClosingState) {
+        qDebug() << "Closing application";
+        m_connectionState = ConnectionState::Disconnected;
+    }
 }
