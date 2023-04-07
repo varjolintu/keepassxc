@@ -19,7 +19,6 @@
 #include "BrowserShared.h"
 #include "config-keepassx.h"
 #include "core/Global.h"
-#include "core/Tools.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -56,22 +55,14 @@ QJsonObject BrowserMessageBuilder::getErrorReply(const QString& action, const in
     return response;
 }
 
-QJsonObject BrowserMessageBuilder::buildMessage(const QString& nonce) const
-{
-    QJsonObject message;
-    message["version"] = KEEPASSXC_VERSION;
-    message["success"] = TRUE_STR;
-    message["nonce"] = nonce;
-    return message;
-}
-
 QJsonObject BrowserMessageBuilder::buildResponse(const QString& action,
                                                  const QString& nonce,
+                                                 const QString& requestId,
                                                  const Parameters& params,
                                                  const QString& publicKey,
                                                  const QString& secretKey)
 {
-    auto message = buildMessage(nonce);
+    QJsonObject message;
 
     Parameters::const_iterator i;
     for (i = params.constBegin(); i != params.constEnd(); ++i) {
@@ -87,6 +78,7 @@ QJsonObject BrowserMessageBuilder::buildResponse(const QString& action,
     response["action"] = action;
     response["message"] = encryptedMessage;
     response["nonce"] = nonce;
+    response["requestID"] = requestId;
     return response;
 }
 

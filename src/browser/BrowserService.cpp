@@ -1,6 +1,5 @@
 /*
  *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
- *  Copyright (C) 2017 Sami Vänttinen <sami.vanttinen@protonmail.com>
  *  Copyright (C) 2013 Francois Ferrand
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -131,15 +130,55 @@ void BrowserService::lockDatabase()
     }
 }
 
-QString BrowserService::getDatabaseHash(bool legacy)
+QString BrowserService::getDatabaseHash()
 {
-    if (legacy) {
-        return QCryptographicHash::hash(
-                   (browserService()->getDatabaseRootUuid() + browserService()->getDatabaseRecycleBinUuid()).toUtf8(),
-                   QCryptographicHash::Sha256)
-            .toHex();
+    return getDatabaseHash(getDatabaseRootUuid());
+}
+
+QString BrowserService::getDatabaseHash(const QString& rootGroupUuid)
+{
+    return QCryptographicHash::hash(rootGroupUuid.toUtf8(), QCryptographicHash::Sha256).toHex();
+}
+
+// Returns all database hashes, lock/unlock and associated statuses
+QJsonArray BrowserService::getDatabaseStatuses(const StringPairList& keyList)
+{
+    QJsonArray databaseStatuses;
+    const auto openDatabases = getMainWindow()->getOpenDatabases();
+
+    for (const auto& dbWidget : openDatabases) {
+        if (!dbWidget) {
+            continue;
+        }
+
+        QJsonObject databaseObject;
+        const auto db = dbWidget->database();
+
+        if (db && db->rootGroup()) {
+            databaseObject["associated"] = false;
+            databaseObject["hash"] = getDatabaseHash(db->rootGroup()->uuidToHex());
+            databaseObject["locked"] = dbWidget->isLocked();
+
+            if (!dbWidget->isLocked()) {
+                for (const auto& key : db->metadata()->customData()->keys()) {
+                    for (const auto& keyPair : keyList) {
+                        if (key.startsWith(CustomData::BrowserKeyPrefix)
+                            && key == CustomData::BrowserKeyPrefix + keyPair.first
+                            && db->metadata()->customData()->value(key) == keyPair.second) {
+                            //qDebug() << db->metadata()->customData()->value(key);
+                            //qDebug() << getDatabaseHash(db->rootGroup()->uuidToHex());
+                            //qDebug() << "Is connected";
+                            databaseObject["associated"] = true;
+                        }
+                    }
+                }
+            }
+
+            databaseStatuses << databaseObject;
+        }
     }
-    return QCryptographicHash::hash(getDatabaseRootUuid().toUtf8(), QCryptographicHash::Sha256).toHex();
+
+    return databaseStatuses;
 }
 
 QString BrowserService::getDatabaseRootUuid()
@@ -149,7 +188,7 @@ QString BrowserService::getDatabaseRootUuid()
         return {};
     }
 
-    Group* rootGroup = db->rootGroup();
+    auto* rootGroup = db->rootGroup();
     if (!rootGroup) {
         return {};
     }
@@ -164,7 +203,7 @@ QString BrowserService::getDatabaseRecycleBinUuid()
         return {};
     }
 
-    Group* recycleBin = db->metadata()->recycleBin();
+    auto* recycleBin = db->metadata()->recycleBin();
     if (!recycleBin) {
         return {};
     }
@@ -200,7 +239,7 @@ QJsonObject BrowserService::getDatabaseGroups()
         return {};
     }
 
-    Group* rootGroup = db->rootGroup();
+    auto* rootGroup = db->rootGroup();
     if (!rootGroup) {
         return {};
     }
@@ -226,7 +265,7 @@ QJsonArray BrowserService::getDatabaseEntries()
         return {};
     }
 
-    Group* rootGroup = db->rootGroup();
+    auto* rootGroup = db->rootGroup();
     if (!rootGroup) {
         return {};
     }
@@ -237,12 +276,12 @@ QJsonArray BrowserService::getDatabaseEntries()
             continue;
         }
 
-        for (const auto& entry : group->entries()) {
-            QJsonObject jentry;
-            jentry["title"] = entry->resolveMultiplePlaceholders(entry->title());
-            jentry["uuid"] = entry->resolveMultiplePlaceholders(entry->uuidToHex());
-            jentry["url"] = entry->resolveMultiplePlaceholders(entry->url());
-            entries.push_back(jentry);
+        for (const auto& e : group->entries()) {
+            QJsonObject entry;
+            entry["title"] = e->resolveMultiplePlaceholders(e->title());
+            entry["uuid"] = e->resolveMultiplePlaceholders(e->uuidToHex());
+            entry["url"] = e->resolveMultiplePlaceholders(e->url());
+            entries.push_back(entry);
         }
     }
     return entries;
@@ -255,7 +294,7 @@ QJsonObject BrowserService::createNewGroup(const QString& groupName)
         return {};
     }
 
-    Group* rootGroup = db->rootGroup();
+    auto* rootGroup = db->rootGroup();
     if (!rootGroup) {
         return {};
     }
@@ -282,7 +321,7 @@ QJsonObject BrowserService::createNewGroup(const QString& groupName)
     }
 
     QString name, uuid;
-    Group* previousGroup = rootGroup;
+    auto* previousGroup = rootGroup;
     auto groups = groupName.split("/");
 
     // Returns the group name based on depth
@@ -296,10 +335,10 @@ QJsonObject BrowserService::createNewGroup(const QString& groupName)
 
     // Create new group(s) always when the path is not found
     for (int i = 0; i < groups.length(); ++i) {
-        QString gName = getGroupName(i);
+        auto gName = getGroupName(i);
         auto tempGroup = rootGroup->findGroupByPath(gName);
         if (!tempGroup) {
-            Group* newGroup = new Group();
+            auto* newGroup = new Group();
             newGroup->setName(groups[i]);
             newGroup->setUuid(QUuid::createUuid());
             newGroup->setParent(previousGroup);
@@ -318,16 +357,24 @@ QJsonObject BrowserService::createNewGroup(const QString& groupName)
     return result;
 }
 
+// TODO: Check this one..
 QString BrowserService::getCurrentTotp(const QString& uuid)
 {
     QList<QSharedPointer<Database>> databases;
-    if (browserSettings()->searchInAllDatabases()) {
+    // TODO: Replace with getOpenDatabases()
+    /*if (browserSettings()->searchInAllDatabases()) {
         for (auto dbWidget : getMainWindow()->getOpenDatabases()) {
             auto db = dbWidget->database();
             if (db) {
                 databases << db;
             }
         }
+    } else {
+        databases << getDatabase();
+    }*/
+
+    if (browserSettings()->searchInAllDatabases()) {
+        databases = getOpenDatabases();
     } else {
         databases << getDatabase();
     }
@@ -344,7 +391,7 @@ QString BrowserService::getCurrentTotp(const QString& uuid)
 }
 
 QJsonArray
-BrowserService::findEntries(const EntryParameters& entryParameters, const StringPairList& keyList, bool* entriesFound)
+BrowserService::findEntries(const EntryParameters& entryParameters, const StringPairList& keyList,  bool* entriesFound)
 {
     if (entriesFound) {
         *entriesFound = false;
@@ -352,8 +399,8 @@ BrowserService::findEntries(const EntryParameters& entryParameters, const String
 
     const bool alwaysAllowAccess = browserSettings()->alwaysAllowAccess();
     const bool ignoreHttpAuth = browserSettings()->httpAuthPermission();
-    const QString siteHost = QUrl(entryParameters.siteUrl).host();
-    const QString formHost = QUrl(entryParameters.formUrl).host();
+    const auto siteHost = QUrl(entryParameters.siteUrl).host();
+    const auto formHost = QUrl(entryParameters.formUrl).host();
 
     // Check entries for authorization
     QList<Entry*> entriesToConfirm;
@@ -410,10 +457,12 @@ BrowserService::findEntries(const EntryParameters& entryParameters, const String
         allowedEntries.append(selectedEntriesToConfirm);
     }
 
+
     // Ensure that database is not locked when the popup was visible
-    if (!isDatabaseOpened()) {
+    // TODO: Check the database(s) the entries were taken?
+    /*if (!isDatabaseOpened()) {
         return {};
-    }
+    }*/
 
     // Sort results
     allowedEntries = sortEntries(allowedEntries, entryParameters.siteUrl, entryParameters.formUrl);
@@ -526,6 +575,7 @@ void BrowserService::showPasswordGenerator(const KeyPairMessage& keyPairMessage)
                     m_browserHost->sendClientMessage(keyPairMessage.socket,
                                                      browserMessageBuilder()->buildResponse("generate-password",
                                                                                             keyPairMessage.nonce,
+                                                                                            keyPairMessage.requestId,
                                                                                             params,
                                                                                             keyPairMessage.publicKey,
                                                                                             keyPairMessage.secretKey));
@@ -640,8 +690,8 @@ void BrowserService::addEntry(const EntryParameters& entryParameters,
         entry->setGroup(getDefaultEntryGroup(db));
     }
 
-    const QString host = QUrl(entryParameters.siteUrl).host();
-    const QString submitHost = QUrl(entryParameters.formUrl).host();
+    const auto host = QUrl(entryParameters.siteUrl).host();
+    const auto submitHost = QUrl(entryParameters.formUrl).host();
     BrowserEntryConfig config;
     config.allow(host);
 
@@ -666,7 +716,7 @@ bool BrowserService::updateEntry(const EntryParameters& entryParameters, const Q
         return false;
     }
 
-    Entry* entry = db->rootGroup()->findEntryByUuid(Tools::hexToUuid(uuid));
+    auto* entry = db->rootGroup()->findEntryByUuid(Tools::hexToUuid(uuid));
     if (!entry) {
         // If entry is not found for update, add a new one to the selected database
         addEntry(entryParameters, "", "", false, db);
@@ -785,41 +835,18 @@ BrowserService::searchEntries(const QSharedPointer<Database>& db, const QString&
     return entries;
 }
 
+// TODO: Are the checks here needed? Could we just use the same function that get-database-statuses use
+// and get the database table from there when comparing the hashes?
 QList<Entry*>
 BrowserService::searchEntries(const QString& siteUrl, const QString& formUrl, const StringPairList& keyList)
 {
-    // Check if database is connected with KeePassXC-Browser
-    auto databaseConnected = [&](const QSharedPointer<Database>& db) {
-        for (const StringPair& keyPair : keyList) {
-            QString key = db->metadata()->customData()->value(CustomData::BrowserKeyPrefix + keyPair.first);
-            if (!key.isEmpty() && keyPair.second == key) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    // Get the list of databases to search
-    QList<QSharedPointer<Database>> databases;
-    if (browserSettings()->searchInAllDatabases()) {
-        for (auto dbWidget : getMainWindow()->getOpenDatabases()) {
-            auto db = dbWidget->database();
-            if (db && databaseConnected(dbWidget->database())) {
-                databases << db;
-            }
-        }
-    } else {
-        const auto& db = getDatabase();
-        if (databaseConnected(db)) {
-            databases << db;
-        }
-    }
+    const auto connectedDatabases = getConnectedDatabases(keyList);
 
     // Search entries matching the hostname
-    QString hostname = QUrl(siteUrl).host();
+    auto hostname = QUrl(siteUrl).host();
     QList<Entry*> entries;
     do {
-        for (const auto& db : databases) {
+        for (const auto& db : connectedDatabases) {
             entries << searchEntries(db, siteUrl, formUrl);
         }
     } while (entries.isEmpty() && removeFirstDomain(hostname));
@@ -904,7 +931,7 @@ QJsonObject BrowserService::prepareEntry(const Entry* entry)
     }
 
     if (entry->isExpired()) {
-        res["expired"] = TRUE_STR;
+        res["expired"] = true;
     }
 
     auto skipAutoSubmitGroup = entry->group()->resolveCustomDataTriState(BrowserService::OPTION_SKIP_AUTO_SUBMIT);
@@ -913,11 +940,11 @@ QJsonObject BrowserService::prepareEntry(const Entry* entry)
             res["skipAutoSubmit"] = entry->customData()->value(BrowserService::OPTION_SKIP_AUTO_SUBMIT);
         }
     } else {
-        res["skipAutoSubmit"] = skipAutoSubmitGroup == Group::Enable ? TRUE_STR : FALSE_STR;
+        res["skipAutoSubmit"] = skipAutoSubmitGroup == Group::Enable;
     }
 
     if (browserSettings()->supportKphFields()) {
-        const EntryAttributes* attr = entry->attributes();
+        const auto* attr = entry->attributes();
         QJsonArray stringFields;
         for (const auto& key : attr->keys()) {
             if (key.startsWith("KPH: ")) {
@@ -1053,12 +1080,6 @@ int BrowserService::sortPriority(const QStringList& urls, const QString& siteUrl
     return *std::max_element(priorityList.begin(), priorityList.end());
 }
 
-bool BrowserService::schemeFound(const QString& url)
-{
-    QUrl address(url);
-    return !address.scheme().isEmpty();
-}
-
 bool BrowserService::isIpAddress(const QString& host) const
 {
     QHostAddress address(host);
@@ -1179,7 +1200,7 @@ bool BrowserService::handleURL(const QString& entryUrl,
  */
 QString BrowserService::getTopLevelDomainFromUrl(const QString& url) const
 {
-    QUrl qurl = QUrl::fromUserInput(url);
+    auto qurl = QUrl::fromUserInput(url);
     QString host = qurl.host();
 
     // If the hostname is an IP address, return it directly
@@ -1194,10 +1215,50 @@ QString BrowserService::getTopLevelDomainFromUrl(const QString& url) const
     // Remove the top level domain part from the hostname, e.g. https://another.example.co.uk -> https://another.example
     host.chop(qurl.topLevelDomain().length());
     // Split the URL and select the last part, e.g. https://another.example -> example
-    QString baseDomain = host.split('.').last();
+    auto baseDomain = host.split('.').last();
     // Append the top level domain back to the URL, e.g. example -> example.co.uk
     baseDomain.append(qurl.topLevelDomain());
     return baseDomain;
+}
+
+QList<QSharedPointer<Database>> BrowserService::getOpenDatabases()
+{
+    QList<QSharedPointer<Database>> databases;
+    for (const auto& dbWidget : getMainWindow()->getOpenDatabases()) {
+        if (dbWidget && !dbWidget->isLocked()) {
+            const auto db = dbWidget->database();
+            if (db && db->rootGroup()) {
+                databases << db;
+            }
+        }
+    }
+
+    return databases;
+}
+
+QList<QSharedPointer<Database>> BrowserService::getConnectedDatabases(const StringPairList& keyList) {
+    const auto databaseStatuses = getDatabaseStatuses(keyList);
+    const auto openDatabases = getOpenDatabases();
+    QList<QSharedPointer<Database>> connectedDatabases;
+
+    for (const auto& db : openDatabases) {
+        const auto hash = getDatabaseHash(db->rootGroup()->uuidToHex());
+        for (const auto& dbStatus : databaseStatuses) {
+            if (dbStatus["hash"].toString() == hash && dbStatus["associated"] == true) {
+                connectedDatabases << db;
+            }
+        }
+    }
+
+    return connectedDatabases;
+}
+
+bool BrowserService::isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash) {
+    const auto databaseStatuses = getDatabaseStatuses(keyList);
+
+    return std::any_of(databaseStatuses.begin(), databaseStatuses.end(), [&databaseHash](const auto& status) {
+        return status["hash"].toString() == databaseHash && status["associated"] == true;
+    });
 }
 
 QSharedPointer<Database> BrowserService::getDatabase()
@@ -1349,6 +1410,6 @@ void BrowserService::processClientMessage(QLocalSocket* socket, const QJsonObjec
     }
 
     auto& action = m_browserClients.value(clientID);
-    auto response = action->processClientMessage(socket, message);
+    auto response = action->processClientMessage(message, socket);
     m_browserHost->sendClientMessage(socket, response);
 }

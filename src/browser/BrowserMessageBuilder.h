@@ -59,9 +59,9 @@ public:
     static BrowserMessageBuilder* instance();
 
     QPair<QString, QString> getKeyPair();
-    QJsonObject buildMessage(const QString& nonce) const;
     QJsonObject buildResponse(const QString& action,
                               const QString& nonce,
+                              const QString& requestId,
                               const Parameters& params,
                               const QString& publicKey,
                               const QString& secretKey);

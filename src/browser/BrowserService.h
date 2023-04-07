@@ -1,6 +1,5 @@
 /*
  *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
- *  Copyright (C) 2017 Sami Vänttinen <sami.vanttinen@protonmail.com>
  *  Copyright (C) 2013 Francois Ferrand
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,13 +37,14 @@ struct KeyPairMessage
 {
     QLocalSocket* socket;
     QString nonce;
+    QString requestId;
     QString publicKey;
     QString secretKey;
 };
 
 struct EntryParameters
 {
-    QString dbid;
+    //QString dbid;
     QString login;
     QString password;
     QString realm;
@@ -70,11 +70,13 @@ public:
 
     QString getKey(const QString& id);
     QString storeKey(const QString& key);
-    QString getDatabaseHash(bool legacy = false);
+    QString getDatabaseHash();
+    QJsonArray getDatabaseStatuses(const StringPairList& keyList);
 
     bool isDatabaseOpened() const;
     bool openDatabase(bool triggerUnlock);
     void lockDatabase();
+    bool isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash);
 
     QJsonObject getDatabaseGroups();
     QJsonArray getDatabaseEntries();
@@ -90,7 +92,7 @@ public:
                   const QSharedPointer<Database>& selectedDb = {});
     bool updateEntry(const EntryParameters& entryParameters, const QString& uuid);
     bool deleteEntry(const QString& uuid);
-    QJsonArray findEntries(const EntryParameters& entryParameters, const StringPairList& keyList, bool* entriesFound);
+    QJsonArray findEntries(const EntryParameters& entryParameters, const StringPairList& keyList,  bool* entriesFound);
     void requestGlobalAutoType(const QString& search);
 
     static const QString KEEPASSXCBROWSER_NAME;
@@ -144,7 +146,6 @@ private:
     Access checkAccess(const Entry* entry, const QString& siteHost, const QString& formHost, const QString& realm);
     Group* getDefaultEntryGroup(const QSharedPointer<Database>& selectedDb = {});
     int sortPriority(const QStringList& urls, const QString& siteUrl, const QString& formUrl);
-    bool schemeFound(const QString& url);
     bool isIpAddress(const QString& host) const;
     bool removeFirstDomain(QString& hostname);
     bool
@@ -155,9 +156,12 @@ private:
                    const bool omitWwwSubdomain = false);
     QString getTopLevelDomainFromUrl(const QString& url) const;
     QString baseDomain(const QString& hostname) const;
+    QList<QSharedPointer<Database>> getOpenDatabases();
+    QList<QSharedPointer<Database>> getConnectedDatabases(const StringPairList& keyList);
     QSharedPointer<Database> getDatabase();
     QSharedPointer<Database> selectedDatabase();
     QString getDatabaseRootUuid();
+    QString getDatabaseHash(const QString& rootGroupUuid);
     QString getDatabaseRecycleBinUuid();
     bool checkLegacySettings(QSharedPointer<Database> db);
     void hideWindow() const;

@@ -19,6 +19,7 @@
 #define BROWSERACTION_H
 
 #include "BrowserMessageBuilder.h"
+#include "BrowserService.h"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -28,6 +29,8 @@ class QLocalSocket;
 
 struct BrowserRequest
 {
+    QString action;
+    QString requestId;
     QString hash;
     QString nonce;
     QString incrementedNonce;
@@ -43,6 +46,11 @@ struct BrowserRequest
         return decrypted.value(param).toArray();
     }
 
+    inline bool getBool(const QString& param) const
+    {
+        return decrypted.value(param).toBool();
+    }
+
     inline QString getString(const QString& param) const
     {
         return decrypted.value(param).toString();
@@ -55,30 +63,32 @@ public:
     explicit BrowserAction() = default;
     ~BrowserAction() = default;
 
-    QJsonObject processClientMessage(QLocalSocket* socket, const QJsonObject& json);
+    QJsonObject processClientMessage(const QJsonObject& message, QLocalSocket* socket);
 
 private:
-    QJsonObject handleAction(QLocalSocket* socket, const QJsonObject& json);
-    QJsonObject handleChangePublicKeys(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetDatabaseHash(const QJsonObject& json, const QString& action);
-    QJsonObject handleAssociate(const QJsonObject& json, const QString& action);
-    QJsonObject handleTestAssociate(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetLogins(const QJsonObject& json, const QString& action);
-    QJsonObject handleGeneratePassword(QLocalSocket* socket, const QJsonObject& json, const QString& action);
-    QJsonObject handleSetLogin(const QJsonObject& json, const QString& action);
-    QJsonObject handleLockDatabase(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetDatabaseGroups(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetDatabaseEntries(const QJsonObject& json, const QString& action);
-    QJsonObject handleCreateNewGroup(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetTotp(const QJsonObject& json, const QString& action);
-    QJsonObject handleDeleteEntry(const QJsonObject& json, const QString& action);
-    QJsonObject handleGlobalAutoType(const QJsonObject& json, const QString& action);
+    QJsonObject handleAction(const QJsonObject& message, QLocalSocket* socket);
+    QJsonObject handleAssociate(const BrowserRequest& browserRequest);
+    QJsonObject handleChangePublicKeys(const QJsonObject& message);
+    QJsonObject handleCreateCredentials(const BrowserRequest& browserRequest);
+    QJsonObject handleCreateNewGroup(const BrowserRequest& browserRequest);
+    QJsonObject handleGetDatabaseStatuses(const BrowserRequest& browserRequest);
+    QJsonObject handleDeleteEntry(const BrowserRequest& browserRequest);
+    QJsonObject handleGeneratePassword(const BrowserRequest& browserRequest, QLocalSocket* socket);
+    QJsonObject handleGetCredentials(const BrowserRequest& browserRequest);
+    QJsonObject handleGetDatabaseEntries(const BrowserRequest& browserRequest);
+    QJsonObject handleGetDatabaseGroups(const BrowserRequest& browserRequest);
+    QJsonObject handleGetTotp(const BrowserRequest& browserRequest);
+    QJsonObject handleGlobalAutoType(const BrowserRequest& browserRequest);
+    QJsonObject handleLockDatabase(const BrowserRequest& browserRequest);
 
 private:
-    QJsonObject buildResponse(const QString& action, const QString& nonce, const Parameters& params = {});
+    QJsonObject buildResponse(const BrowserRequest& browserRequest, const Parameters& params = {}) const;
+    QJsonObject buildErrorResponse(const BrowserRequest& browserRequest, const int errorCode) const;
     QJsonObject getErrorReply(const QString& action, const int errorCode) const;
-    QJsonObject decryptMessage(const QString& message, const QString& nonce);
-    BrowserRequest decodeRequest(const QJsonObject& json);
+    QJsonObject decryptMessage(const QString& message, const QString& nonce) const;
+    BrowserRequest decodeRequest(const QJsonObject& message) const;
+    StringPairList getConnectionKeys(const BrowserRequest& browserRequest) const;
+    bool isDatabaseConnected(const BrowserRequest& browserRequest) const;
 
 private:
     static const int MaxUrlLength;
