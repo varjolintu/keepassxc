@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #include "BrowserSettingsWidget.h"
 #include "ui_BrowserSettingsWidget.h"
 
+#include "BrowserService.h"
 #include "BrowserSettings.h"
 #include "config-keepassx.h"
 
@@ -116,7 +117,18 @@ void BrowserSettingsWidget::loadSettings()
     // TODO: fix this
     m_ui->showNotification->hide();
 
-    m_ui->alwaysAllowAccess->setChecked(settings->alwaysAllowAccess());
+    if (!browserService()->isDatabaseOpened()) {
+        m_ui->alwaysAllowAccess->setChecked(false);
+        m_ui->alwaysAllowAccess->setEnabled(false);
+        m_ui->allowGetDatabaseEntriesRequest->setChecked(false);
+        m_ui->allowGetDatabaseEntriesRequest->setEnabled(false);
+    } else {
+        m_ui->alwaysAllowAccess->setChecked(browserService()->getAlwaysAllowAccess());
+        m_ui->alwaysAllowAccess->setEnabled(true);
+        m_ui->allowGetDatabaseEntriesRequest->setChecked(browserService()->getAllowGetDatabaseEntriesRequest());
+        m_ui->allowGetDatabaseEntriesRequest->setEnabled(true);
+    }
+
     m_ui->alwaysAllowUpdate->setChecked(settings->alwaysAllowUpdate());
     m_ui->httpAuthPermission->setChecked(settings->httpAuthPermission());
     m_ui->searchInAllDatabases->setChecked(settings->searchInAllDatabases());
@@ -125,7 +137,6 @@ void BrowserSettingsWidget::loadSettings()
     m_ui->useCustomProxy->setChecked(settings->useCustomProxy());
     m_ui->customProxyLocation->setText(settings->replaceHomePath(settings->customProxyLocation()));
     m_ui->updateBinaryPath->setChecked(settings->updateBinaryPath());
-    m_ui->allowGetDatabaseEntriesRequest->setChecked(settings->allowGetDatabaseEntriesRequest());
     m_ui->allowExpiredCredentials->setChecked(settings->allowExpiredCredentials());
     m_ui->chromeSupport->setChecked(settings->browserSupport(BrowserShared::CHROME));
     m_ui->chromiumSupport->setChecked(settings->browserSupport(BrowserShared::CHROMIUM));
@@ -218,14 +229,15 @@ void BrowserSettingsWidget::saveSettings()
     settings->setCustomProxyLocation(browserSettings()->replaceTildeHomePath(m_ui->customProxyLocation->text()));
 
     settings->setUpdateBinaryPath(m_ui->updateBinaryPath->isChecked());
-    settings->setAllowGetDatabaseEntriesRequest(m_ui->allowGetDatabaseEntriesRequest->isChecked());
     settings->setAllowExpiredCredentials(m_ui->allowExpiredCredentials->isChecked());
-    settings->setAlwaysAllowAccess(m_ui->alwaysAllowAccess->isChecked());
     settings->setAlwaysAllowUpdate(m_ui->alwaysAllowUpdate->isChecked());
     settings->setHttpAuthPermission(m_ui->httpAuthPermission->isChecked());
     settings->setSearchInAllDatabases(m_ui->searchInAllDatabases->isChecked());
     settings->setSupportKphFields(m_ui->supportKphFields->isChecked());
     settings->setNoMigrationPrompt(m_ui->noMigrationPrompt->isChecked());
+
+    browserService()->setAlwaysAllowAccess(m_ui->alwaysAllowAccess->isChecked());
+    browserService()->setAllowGetDatabaseEntriesRequest(m_ui->allowGetDatabaseEntriesRequest->isChecked());
 
 #ifdef QT_DEBUG
     settings->setCustomExtensionId(m_ui->customExtensionId->text());

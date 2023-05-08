@@ -56,6 +56,10 @@ const QString BrowserService::OPTION_HIDE_ENTRY = QStringLiteral("BrowserHideEnt
 const QString BrowserService::OPTION_ONLY_HTTP_AUTH = QStringLiteral("BrowserOnlyHttpAuth");
 const QString BrowserService::OPTION_NOT_HTTP_AUTH = QStringLiteral("BrowserNotHttpAuth");
 const QString BrowserService::OPTION_OMIT_WWW = QStringLiteral("BrowserOmitWww");
+// Browser integration related options saved in database custom data
+const QString BrowserService::OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST =
+    QStringLiteral("BrowserAllowGetDatabaseEntriesRequest");
+const QString BrowserService::OPTION_ALWAYS_ALLOW_ACCESS = QStringLiteral("BrowserAlwaysAllowAccess");
 // Multiple URL's
 const QString BrowserService::ADDITIONAL_URL = QStringLiteral("KP2A_URL");
 
@@ -219,14 +223,26 @@ QJsonObject BrowserService::getDatabaseGroups()
     return result;
 }
 
-QJsonArray BrowserService::getDatabaseEntries()
+QJsonArray BrowserService::getDatabaseEntries(bool* accessDenied)
 {
+    if (accessDenied) {
+        *accessDenied = true;
+    }
+
+    if (!getAllowGetDatabaseEntriesRequest()) {
+        return {};
+    }
+
+    if (accessDenied != nullptr) {
+        *accessDenied = false;
+    }
+
     auto db = getDatabase();
     if (!db) {
         return {};
     }
 
-    Group* rootGroup = db->rootGroup();
+    auto* rootGroup = db->rootGroup();
     if (!rootGroup) {
         return {};
     }
@@ -350,7 +366,7 @@ BrowserService::findEntries(const EntryParameters& entryParameters, const String
         *entriesFound = false;
     }
 
-    const bool alwaysAllowAccess = browserSettings()->alwaysAllowAccess();
+    const bool alwaysAllowAccess = getAlwaysAllowAccess();
     const bool ignoreHttpAuth = browserSettings()->httpAuthPermission();
     const QString siteHost = QUrl(entryParameters.siteUrl).host();
     const QString formHost = QUrl(entryParameters.formUrl).host();
@@ -521,6 +537,27 @@ bool BrowserService::isPasswordGeneratorRequested() const
     return m_passwordGeneratorRequested;
 }
 
+bool BrowserService::getAlwaysAllowAccess()
+{
+    return getBrowserCustomDataOption(BrowserService::OPTION_ALWAYS_ALLOW_ACCESS) == TRUE_STR;
+}
+
+void BrowserService::setAlwaysAllowAccess(bool enabled)
+{
+    setBrowserCustomDataOption(BrowserService::OPTION_ALWAYS_ALLOW_ACCESS, enabled ? TRUE_STR : FALSE_STR);
+}
+
+bool BrowserService::getAllowGetDatabaseEntriesRequest()
+{
+    return getBrowserCustomDataOption(BrowserService::OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST) == TRUE_STR;
+}
+
+void BrowserService::setAllowGetDatabaseEntriesRequest(bool enabled)
+{
+    setBrowserCustomDataOption(BrowserService::OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST,
+                               enabled ? TRUE_STR : FALSE_STR);
+}
+
 QString BrowserService::storeKey(const QString& key)
 {
     auto db = getDatabase();
@@ -581,6 +618,26 @@ QString BrowserService::getKey(const QString& id)
     }
 
     return db->metadata()->customData()->value(CustomData::BrowserKeyPrefix + id);
+}
+
+QString BrowserService::getBrowserCustomDataOption(const QString& key)
+{
+    auto db = getDatabase();
+    if (!db) {
+        return {};
+    }
+
+    return db->metadata()->customData()->value(CustomData::OptionPrefix + key);
+}
+
+void BrowserService::setBrowserCustomDataOption(const QString& key, const QString& value)
+{
+    auto db = getDatabase();
+    if (!db) {
+        return;
+    }
+
+    db->metadata()->customData()->set(CustomData::OptionPrefix + key, value);
 }
 
 void BrowserService::addEntry(const EntryParameters& entryParameters,
