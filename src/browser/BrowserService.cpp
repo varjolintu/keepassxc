@@ -24,6 +24,7 @@
 #include "BrowserHost.h"
 #include "BrowserMessageBuilder.h"
 #include "BrowserSettings.h"
+#include "core/DatabaseSettings.h"
 #include "core/Tools.h"
 #include "gui/MainWindow.h"
 #include "gui/MessageBox.h"
@@ -56,10 +57,6 @@ const QString BrowserService::OPTION_HIDE_ENTRY = QStringLiteral("BrowserHideEnt
 const QString BrowserService::OPTION_ONLY_HTTP_AUTH = QStringLiteral("BrowserOnlyHttpAuth");
 const QString BrowserService::OPTION_NOT_HTTP_AUTH = QStringLiteral("BrowserNotHttpAuth");
 const QString BrowserService::OPTION_OMIT_WWW = QStringLiteral("BrowserOmitWww");
-// Browser integration related options saved in database custom data
-const QString BrowserService::OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST =
-    QStringLiteral("BrowserAllowGetDatabaseEntriesRequest");
-const QString BrowserService::OPTION_ALWAYS_ALLOW_ACCESS = QStringLiteral("BrowserAlwaysAllowAccess");
 // Multiple URL's
 const QString BrowserService::ADDITIONAL_URL = QStringLiteral("KP2A_URL");
 
@@ -223,23 +220,23 @@ QJsonObject BrowserService::getDatabaseGroups()
     return result;
 }
 
-QJsonArray BrowserService::getDatabaseEntries(bool* accessDenied)
+QJsonArray BrowserService::getDatabaseEntries(bool* accessDenied, const QSharedPointer<Database>& selectedDb)
 {
     if (accessDenied) {
         *accessDenied = true;
     }
 
-    if (!getAllowGetDatabaseEntriesRequest()) {
+    auto db = selectedDb ? selectedDb : getDatabase();
+    if (!db) {
+        return {};
+    }
+
+    if (!databaseSettings()->getAllowGetDatabaseEntriesRequest(db)) {
         return {};
     }
 
     if (accessDenied != nullptr) {
         *accessDenied = false;
-    }
-
-    auto db = getDatabase();
-    if (!db) {
-        return {};
     }
 
     auto* rootGroup = db->rootGroup();
@@ -366,7 +363,6 @@ BrowserService::findEntries(const EntryParameters& entryParameters, const String
         *entriesFound = false;
     }
 
-    const bool alwaysAllowAccess = getAlwaysAllowAccess();
     const bool ignoreHttpAuth = browserSettings()->httpAuthPermission();
     const QString siteHost = QUrl(entryParameters.siteUrl).host();
     const QString formHost = QUrl(entryParameters.formUrl).host();
@@ -402,11 +398,7 @@ BrowserService::findEntries(const EntryParameters& entryParameters, const String
             continue;
 
         case Unknown:
-            if (alwaysAllowAccess) {
-                allowedEntries.append(entry);
-            } else {
-                entriesToConfirm.append(entry);
-            }
+            entriesToConfirm.append(entry);
             break;
 
         case Allowed:
@@ -539,23 +531,22 @@ bool BrowserService::isPasswordGeneratorRequested() const
 
 bool BrowserService::getAlwaysAllowAccess()
 {
-    return getBrowserCustomDataOption(BrowserService::OPTION_ALWAYS_ALLOW_ACCESS) == TRUE_STR;
+    return databaseSettings()->getAlwaysAllowAccess(getDatabase());
 }
 
 void BrowserService::setAlwaysAllowAccess(bool enabled)
 {
-    setBrowserCustomDataOption(BrowserService::OPTION_ALWAYS_ALLOW_ACCESS, enabled ? TRUE_STR : FALSE_STR);
+    databaseSettings()->setAlwaysAllowAccess(getDatabase(), enabled);
 }
 
 bool BrowserService::getAllowGetDatabaseEntriesRequest()
 {
-    return getBrowserCustomDataOption(BrowserService::OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST) == TRUE_STR;
+    return databaseSettings()->getAllowGetDatabaseEntriesRequest(getDatabase());
 }
 
 void BrowserService::setAllowGetDatabaseEntriesRequest(bool enabled)
 {
-    setBrowserCustomDataOption(BrowserService::OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST,
-                               enabled ? TRUE_STR : FALSE_STR);
+    databaseSettings()->setAllowGetDatabaseEntriesRequest(getDatabase(), enabled);
 }
 
 QString BrowserService::storeKey(const QString& key)
@@ -618,26 +609,6 @@ QString BrowserService::getKey(const QString& id)
     }
 
     return db->metadata()->customData()->value(CustomData::BrowserKeyPrefix + id);
-}
-
-QString BrowserService::getBrowserCustomDataOption(const QString& key)
-{
-    auto db = getDatabase();
-    if (!db) {
-        return {};
-    }
-
-    return db->metadata()->customData()->value(CustomData::OptionPrefix + key);
-}
-
-void BrowserService::setBrowserCustomDataOption(const QString& key, const QString& value)
-{
-    auto db = getDatabase();
-    if (!db) {
-        return;
-    }
-
-    db->metadata()->customData()->set(CustomData::OptionPrefix + key, value);
 }
 
 void BrowserService::addEntry(const EntryParameters& entryParameters,
@@ -970,6 +941,13 @@ BrowserService::checkAccess(const Entry* entry, const QString& siteHost, const Q
 {
     if (entry->isExpired()) {
         return browserSettings()->allowExpiredCredentials() ? Unknown : Denied;
+    }
+
+    const auto db = entry->database();
+    if (db
+        && db->metadata()->customData()->value(CustomData::OptionPrefix + DatabaseSettings::OPTION_ALWAYS_ALLOW_ACCESS)
+               == TRUE_STR) {
+        return Allowed;
     }
 
     BrowserEntryConfig config;

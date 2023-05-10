@@ -69,8 +69,6 @@ public:
     void setEnabled(bool enabled);
 
     QString getKey(const QString& id);
-    QString getBrowserCustomDataOption(const QString& key);
-    void setBrowserCustomDataOption(const QString& key, const QString& value);
     QString storeKey(const QString& key);
     QString getDatabaseHash(bool legacy = false);
 
@@ -79,7 +77,7 @@ public:
     void lockDatabase();
 
     QJsonObject getDatabaseGroups();
-    QJsonArray getDatabaseEntries(bool* accessDenied);
+    QJsonArray getDatabaseEntries(bool* accessDenied, const QSharedPointer<Database>& selectedDb = {});
     QJsonObject createNewGroup(const QString& groupName);
     QString getCurrentTotp(const QString& uuid);
     void showPasswordGenerator(const KeyPairMessage& keyPairMessage);
@@ -108,8 +106,6 @@ public:
     static const QString OPTION_NOT_HTTP_AUTH;
     static const QString OPTION_OMIT_WWW;
     static const QString ADDITIONAL_URL;
-    static const QString OPTION_ALLOW_GET_DATABASE_ENTRIES_REQUEST;
-    static const QString OPTION_ALWAYS_ALLOW_ACCESS;
 
 signals:
     void requestUnlock();
