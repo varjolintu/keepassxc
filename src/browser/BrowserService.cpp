@@ -165,9 +165,9 @@ QJsonArray BrowserService::getDatabaseStatuses(const StringPairList& keyList)
                         if (key.startsWith(CustomData::BrowserKeyPrefix)
                             && key == CustomData::BrowserKeyPrefix + keyPair.first
                             && db->metadata()->customData()->value(key) == keyPair.second) {
-                            //qDebug() << db->metadata()->customData()->value(key);
-                            //qDebug() << getDatabaseHash(db->rootGroup()->uuidToHex());
-                            //qDebug() << "Is connected";
+                            // qDebug() << db->metadata()->customData()->value(key);
+                            // qDebug() << getDatabaseHash(db->rootGroup()->uuidToHex());
+                            // qDebug() << "Is connected";
                             databaseObject["associated"] = true;
                         }
                     }
@@ -357,41 +357,30 @@ QJsonObject BrowserService::createNewGroup(const QString& groupName)
     return result;
 }
 
-// TODO: Check this one..
-QString BrowserService::getCurrentTotp(const QString& uuid)
+QJsonArray BrowserService::getTotp(const StringPairList& keyList, const QStringList& uuids)
 {
-    QList<QSharedPointer<Database>> databases;
-    // TODO: Replace with getOpenDatabases()
-    /*if (browserSettings()->searchInAllDatabases()) {
-        for (auto dbWidget : getMainWindow()->getOpenDatabases()) {
-            auto db = dbWidget->database();
-            if (db) {
-                databases << db;
+    QJsonArray result;
+
+    const auto databases = getOpenDatabases();
+    for (const auto& db : databases) {
+        if (!isDatabaseConnected(keyList, getDatabaseHash(db->rootGroup()->uuidToHex()))) {
+            continue;
+        }
+
+        for (const auto& u : uuids) {
+            const auto entryUuid = Tools::hexToUuid(u);
+            auto entry = db->rootGroup()->findEntryByUuid(entryUuid, true);
+            if (entry) {
+                result << QJsonObject{{"totp", entry->totp()}, {"uuid", u}};
             }
         }
-    } else {
-        databases << getDatabase();
-    }*/
-
-    if (browserSettings()->searchInAllDatabases()) {
-        databases = getOpenDatabases();
-    } else {
-        databases << getDatabase();
     }
 
-    auto entryUuid = Tools::hexToUuid(uuid);
-    for (const auto& db : databases) {
-        auto entry = db->rootGroup()->findEntryByUuid(entryUuid, true);
-        if (entry) {
-            return entry->totp();
-        }
-    }
-
-    return {};
+    return result;
 }
 
 QJsonArray
-BrowserService::findEntries(const EntryParameters& entryParameters, const StringPairList& keyList,  bool* entriesFound)
+BrowserService::findEntries(const EntryParameters& entryParameters, const StringPairList& keyList, bool* entriesFound)
 {
     if (entriesFound) {
         *entriesFound = false;
@@ -456,7 +445,6 @@ BrowserService::findEntries(const EntryParameters& entryParameters, const String
     if (!selectedEntriesToConfirm.isEmpty()) {
         allowedEntries.append(selectedEntriesToConfirm);
     }
-
 
     // Ensure that database is not locked when the popup was visible
     // TODO: Check the database(s) the entries were taken?
@@ -1236,7 +1224,8 @@ QList<QSharedPointer<Database>> BrowserService::getOpenDatabases()
     return databases;
 }
 
-QList<QSharedPointer<Database>> BrowserService::getConnectedDatabases(const StringPairList& keyList) {
+QList<QSharedPointer<Database>> BrowserService::getConnectedDatabases(const StringPairList& keyList)
+{
     const auto databaseStatuses = getDatabaseStatuses(keyList);
     const auto openDatabases = getOpenDatabases();
     QList<QSharedPointer<Database>> connectedDatabases;
@@ -1253,7 +1242,8 @@ QList<QSharedPointer<Database>> BrowserService::getConnectedDatabases(const Stri
     return connectedDatabases;
 }
 
-bool BrowserService::isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash) {
+bool BrowserService::isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash)
+{
     const auto databaseStatuses = getDatabaseStatuses(keyList);
 
     return std::any_of(databaseStatuses.begin(), databaseStatuses.end(), [&databaseHash](const auto& status) {

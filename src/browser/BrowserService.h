@@ -81,7 +81,7 @@ public:
     QJsonObject getDatabaseGroups();
     QJsonArray getDatabaseEntries();
     QJsonObject createNewGroup(const QString& groupName);
-    QString getCurrentTotp(const QString& uuid);
+    QJsonArray getTotp(const StringPairList& keyList, const QStringList& uuids);
     void showPasswordGenerator(const KeyPairMessage& keyPairMessage);
     bool isPasswordGeneratorRequested() const;
 
