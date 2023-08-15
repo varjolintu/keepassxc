@@ -17,9 +17,9 @@
 
 #include "BrowserAction.h"
 #include "BrowserSettings.h"
+#include "config-keepassx.h"
 #include "core/Global.h"
 #include "core/Tools.h"
-#include "config-keepassx.h"
 
 #include <QJsonDocument>
 #include <QLocalSocket>
@@ -39,7 +39,6 @@ static const QString BROWSER_REQUEST_GET_DATABASE_STATUSES = QStringLiteral("get
 static const QString BROWSER_REQUEST_GET_TOTP = QStringLiteral("get-totp");
 static const QString BROWSER_REQUEST_LOCK_DATABASE = QStringLiteral("lock-database");
 static const QString BROWSER_REQUEST_REQUEST_AUTOTYPE = QStringLiteral("request-autotype");
-
 
 QJsonObject BrowserAction::processClientMessage(const QJsonObject& message, QLocalSocket* socket)
 {
@@ -143,7 +142,7 @@ QJsonObject BrowserAction::handleChangePublicKeys(const QJsonObject& message)
         return getErrorReply(action, ERROR_KEEPASS_CLIENT_PUBLIC_KEY_NOT_RECEIVED);
     }
 
-    m_associated = false;
+    m_associated = false; // TODO: Remove
     auto keyPair = browserMessageBuilder()->getKeyPair();
     if (keyPair.first.isEmpty() || keyPair.second.isEmpty()) {
         return getErrorReply(action, ERROR_KEEPASS_ENCRYPTION_KEY_UNRECOGNIZED);
@@ -247,7 +246,8 @@ QJsonObject BrowserAction::handleGeneratePassword(const BrowserRequest& browserR
         return buildErrorResponse(browserRequest, ERROR_KEEPASS_ACTION_CANCELLED_OR_DENIED);
     }
 
-    KeyPairMessage keyPairMessage{socket, browserRequest.incrementedNonce, browserRequest.requestId, m_clientPublicKey, m_secretKey};
+    KeyPairMessage keyPairMessage{
+        socket, browserRequest.incrementedNonce, browserRequest.requestId, m_clientPublicKey, m_secretKey};
 
     browserService()->showPasswordGenerator(keyPairMessage);
     return {};
@@ -274,6 +274,7 @@ QJsonObject BrowserAction::handleGetCredentials(const BrowserRequest& browserReq
     entryParameters.formUrl = formUrl;
     entryParameters.httpAuth = httpAuth;
 
+    // TODO: Add autoLockRequested boolean
     bool entriesFound = false;
     const auto entries = browserService()->findEntries(entryParameters, keyList, &entriesFound);
     if (!entriesFound) {
@@ -327,20 +328,24 @@ QJsonObject BrowserAction::handleGetDatabaseStatuses(const BrowserRequest& brows
     return buildResponse(browserRequest, params);
 }
 
-// TODO: Return TOTP from all entries
 QJsonObject BrowserAction::handleGetTotp(const BrowserRequest& browserRequest)
 {
-    // TODO: Check association with the current database
-    if (!m_associated) {
-        return buildErrorResponse(browserRequest, ERROR_KEEPASS_ASSOCIATION_FAILED);
-    }
-
-    const auto uuid = browserRequest.getString("uuid");
-    if (!Tools::isValidUuid(uuid)) {
+    const auto uuids = browserRequest.getArray("uuids");
+    if (uuids.isEmpty()) {
         return buildErrorResponse(browserRequest, ERROR_KEEPASS_NO_VALID_UUID_PROVIDED);
     }
 
-    const Parameters params{{"totp", browserService()->getCurrentTotp(uuid)}};
+    QStringList uuidList;
+    for (const auto &u : uuids) {
+        const auto uuid = u.toString();
+        if (!Tools::isValidUuid(uuid)) {
+            return buildErrorResponse(browserRequest, ERROR_KEEPASS_NO_VALID_UUID_PROVIDED);
+        }
+
+        uuidList << uuid;
+    }
+
+    const Parameters params{{"totpList", browserService()->getTotp(getConnectionKeys(browserRequest), uuidList)}};
     return buildResponse(browserRequest, params);
 }
 
@@ -384,7 +389,12 @@ QJsonObject BrowserAction::buildErrorResponse(const BrowserRequest& browserReque
 
 QJsonObject BrowserAction::buildResponse(const BrowserRequest& browserRequest, const Parameters& params) const
 {
-    return browserMessageBuilder()->buildResponse(browserRequest.action, browserRequest.incrementedNonce, browserRequest.requestId, params, m_clientPublicKey, m_secretKey);
+    return browserMessageBuilder()->buildResponse(browserRequest.action,
+                                                  browserRequest.incrementedNonce,
+                                                  browserRequest.requestId,
+                                                  params,
+                                                  m_clientPublicKey,
+                                                  m_secretKey);
 }
 
 BrowserRequest BrowserAction::decodeRequest(const QJsonObject& message) const
