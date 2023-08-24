@@ -165,9 +165,6 @@ QJsonArray BrowserService::getDatabaseStatuses(const StringPairList& keyList)
                         if (key.startsWith(CustomData::BrowserKeyPrefix)
                             && key == CustomData::BrowserKeyPrefix + keyPair.first
                             && db->metadata()->customData()->value(key) == keyPair.second) {
-                            // qDebug() << db->metadata()->customData()->value(key);
-                            // qDebug() << getDatabaseHash(db->rootGroup()->uuidToHex());
-                            // qDebug() << "Is connected";
                             databaseObject["associated"] = true;
                         }
                     }
@@ -1242,12 +1239,14 @@ QList<QSharedPointer<Database>> BrowserService::getConnectedDatabases(const Stri
     return connectedDatabases;
 }
 
+// Check if selected database is connected to KeePassXC. If no hash is provided, active database's hash is used.
 bool BrowserService::isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash)
 {
     const auto databaseStatuses = getDatabaseStatuses(keyList);
+    const auto hash = databaseHash.isEmpty() ? getDatabaseHash() : databaseHash;
 
-    return std::any_of(databaseStatuses.begin(), databaseStatuses.end(), [&databaseHash](const auto& status) {
-        return status["hash"].toString() == databaseHash && status["associated"] == true;
+    return std::any_of(databaseStatuses.begin(), databaseStatuses.end(), [&hash](const auto& status) {
+        return status["hash"].toString() == hash && status["associated"] == true;
     });
 }
 

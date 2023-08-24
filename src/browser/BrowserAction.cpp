@@ -142,7 +142,6 @@ QJsonObject BrowserAction::handleChangePublicKeys(const QJsonObject& message)
         return getErrorReply(action, ERROR_KEEPASS_CLIENT_PUBLIC_KEY_NOT_RECEIVED);
     }
 
-    m_associated = false; // TODO: Remove
     auto keyPair = browserMessageBuilder()->getKeyPair();
     if (keyPair.first.isEmpty() || keyPair.second.isEmpty()) {
         return getErrorReply(action, ERROR_KEEPASS_ENCRYPTION_KEY_UNRECOGNIZED);
@@ -223,7 +222,6 @@ QJsonObject BrowserAction::handleCreateNewGroup(const BrowserRequest& browserReq
 
 QJsonObject BrowserAction::handleDeleteEntry(const BrowserRequest& browserRequest)
 {
-    // Check association with the current database
     if (!isDatabaseConnected(browserRequest)) {
         return buildErrorResponse(browserRequest, ERROR_KEEPASS_ASSOCIATION_FAILED);
     }
@@ -336,7 +334,7 @@ QJsonObject BrowserAction::handleGetTotp(const BrowserRequest& browserRequest)
     }
 
     QStringList uuidList;
-    for (const auto &u : uuids) {
+    for (const auto& u : uuids) {
         const auto uuid = u.toString();
         if (!Tools::isValidUuid(uuid)) {
             return buildErrorResponse(browserRequest, ERROR_KEEPASS_NO_VALID_UUID_PROVIDED);

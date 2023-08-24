@@ -121,7 +121,7 @@ void TestBrowser::testBuildResponse()
         {"test-param-1", val}, {"test-param-2", 2}, {"test-param-3", false}, {"object", object}, {"arr", arr}};
 
     const auto action = QString("test-action");
-    const auto message = browserMessageBuilder()->buildResponse(action, NONCE, params, PUBLICKEY, SERVERSECRETKEY);
+    const auto message = browserMessageBuilder()->buildResponse(action, NONCE, "", params, PUBLICKEY, SERVERSECRETKEY);
     QVERIFY(!message.isEmpty());
     QCOMPARE(message["action"].toString(), action);
     QCOMPARE(message["nonce"].toString(), NONCE);

@@ -96,7 +96,6 @@ private:
     QString m_clientPublicKey;
     QString m_publicKey;
     QString m_secretKey;
-    bool m_associated = false;
 
     friend class TestBrowser;
 };
