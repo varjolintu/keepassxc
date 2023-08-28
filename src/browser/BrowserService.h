@@ -75,7 +75,7 @@ public:
 
     bool isDatabaseOpened() const;
     bool openDatabase(bool triggerUnlock);
-    void lockDatabase();
+    void lockDatabase(bool lockSingle);
     bool isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash);
 
     QJsonObject getDatabaseGroups();

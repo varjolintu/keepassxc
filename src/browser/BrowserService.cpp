@@ -123,10 +123,15 @@ bool BrowserService::openDatabase(bool triggerUnlock)
     return false;
 }
 
-void BrowserService::lockDatabase()
+void BrowserService::lockDatabase(bool lockSingle)
 {
     if (m_currentDatabaseWidget) {
-        m_currentDatabaseWidget->lock();
+        if (lockSingle) {
+            emit m_currentDatabaseWidget->lockAndSwitchToFirstUnlockedDatabase();
+            return;
+        }
+
+        emit m_currentDatabaseWidget->lockDatabases();
     }
 }
 

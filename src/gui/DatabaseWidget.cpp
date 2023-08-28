@@ -216,7 +216,8 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     connect(m_opVaultOpenWidget, SIGNAL(dialogFinished(bool)), SLOT(loadDatabase(bool)));
     connect(m_csvImportWizard, SIGNAL(importFinished(bool)), SLOT(csvImportFinished(bool)));
     connect(this, SIGNAL(currentChanged(int)), SLOT(emitCurrentModeChanged()));
-    connect(this, SIGNAL(requestGlobalAutoType(const QString&)), parent, SLOT(performGlobalAutoType(const QString&)));
+    connect(this, SIGNAL(lockAndSwitchToFirstUnlockedDatabase()), parent, SLOT(lockAndSwitchToFirstUnlockedDatabase()));
+    connect(this, SIGNAL(lockDatabases()), parent, SLOT(lockDatabases()));
     // clang-format on
 
     connectDatabaseSignals();

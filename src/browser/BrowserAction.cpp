@@ -365,7 +365,9 @@ QJsonObject BrowserAction::handleLockDatabase(const BrowserRequest& browserReque
         return buildErrorResponse(browserRequest, ERROR_KEEPASS_DATABASE_HASH_NOT_RECEIVED);
     }
 
-    browserService()->lockDatabase();
+    const auto lockSingle = browserRequest.getBool("lockSingle");
+
+    browserService()->lockDatabase(lockSingle);
     return buildResponse(browserRequest);
 }
 
