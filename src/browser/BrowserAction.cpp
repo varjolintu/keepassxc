@@ -366,9 +366,10 @@ QJsonObject BrowserAction::handleLockDatabase(const BrowserRequest& browserReque
     }
 
     const auto lockSingle = browserRequest.getBool("lockSingle");
-
     browserService()->lockDatabase(lockSingle);
-    return buildResponse(browserRequest);
+
+    const Parameters params{{"result", true}};
+    return buildResponse(browserRequest, params);
 }
 
 QJsonObject BrowserAction::decryptMessage(const QString& message, const QString& nonce) const
