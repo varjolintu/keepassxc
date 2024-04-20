@@ -328,7 +328,7 @@ void NixUtils::setColorScheme(QDBusVariant value)
 
 quint64 NixUtils::getProcessStartTime() const
 {
-    QString processStatPath = QString("/proc/%1/stat").arg(QCoreApplication::applicationPid());
+    QString processStatPath = QStringLiteral("/proc/%1/stat").arg(QCoreApplication::applicationPid());
     QFile processStatFile(processStatPath);
 
     if (!processStatFile.open(QIODevice::ReadOnly | QIODevice::Text)) {

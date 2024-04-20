@@ -41,7 +41,7 @@ void TestKdbx2::initTestCase()
 void TestKdbx2::verifyKdbx2Db(QSharedPointer<Database> db)
 {
     QVERIFY(db);
-    QCOMPARE(db->rootGroup()->name(), QString("Format200"));
+    QCOMPARE(db->rootGroup()->name(), QStringLiteral("Format200"));
     QVERIFY(!db->metadata()->protectTitle());
     QVERIFY(db->metadata()->protectUsername());
     QVERIFY(!db->metadata()->protectPassword());
@@ -51,8 +51,8 @@ void TestKdbx2::verifyKdbx2Db(QSharedPointer<Database> db)
     QCOMPARE(db->rootGroup()->entries().size(), 1);
     auto entry = db->rootGroup()->entries().at(0);
 
-    QCOMPARE(entry->title(), QString("Sample Entry"));
-    QCOMPARE(entry->username(), QString("User Name"));
+    QCOMPARE(entry->title(), QStringLiteral("Sample Entry"));
+    QCOMPARE(entry->username(), QStringLiteral("User Name"));
     QCOMPARE(entry->attachments()->keys().size(), 2);
     QCOMPARE(entry->attachments()->value("myattach.txt"), QByteArray("abcdefghijk"));
     QCOMPARE(entry->attachments()->value("test.txt"), QByteArray("this is a test"));
@@ -65,7 +65,7 @@ void TestKdbx2::verifyKdbx2Db(QSharedPointer<Database> db)
 
 void TestKdbx2::testFormat200()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/Format200.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/Format200.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("a"));
     auto db = QSharedPointer<Database>::create();
@@ -79,7 +79,7 @@ void TestKdbx2::testFormat200()
 
 void TestKdbx2::testFormat200Upgrade()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/Format200.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/Format200.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("a"));
     auto db = QSharedPointer<Database>::create();
@@ -97,7 +97,7 @@ void TestKdbx2::testFormat200Upgrade()
     KeePass2Writer writer;
     QVERIFY(writer.writeDatabase(&buffer, db.data()));
     if (writer.hasError()) {
-        QFAIL(qPrintable(QString("Error while writing database: %1").arg(writer.errorString())));
+        QFAIL(qPrintable(QStringLiteral("Error while writing database: %1").arg(writer.errorString())));
     }
 
     // read buffer back
@@ -105,7 +105,7 @@ void TestKdbx2::testFormat200Upgrade()
     auto targetDb = QSharedPointer<Database>::create();
     QVERIFY(reader.readDatabase(&buffer, key, targetDb.data()));
     if (reader.hasError()) {
-        QFAIL(qPrintable(QString("Error while reading database: %1").arg(reader.errorString())));
+        QFAIL(qPrintable(QStringLiteral("Error while reading database: %1").arg(reader.errorString())));
     }
 
     // database should now be upgraded to KDBX 3 without data loss

@@ -133,7 +133,7 @@ void TestPasskeys::testBase64WithHexStrings()
 
     auto base64FromArray = browserMessageBuilder()->getBase64FromArray(reinterpret_cast<const char*>(buf), bufSize);
     QCOMPARE(base64FromArray,
-             QString("H40eHY5JBe_yVLvKKDYP38kAbG3RaM_voFnQdYZCKgwfQqP43VjxpAY3tmG686KiUdw3PF3Pqt446uMtc6-Ktg"));
+             QStringLiteral("H40eHY5JBe_yVLvKKDYP38kAbG3RaM_voFnQdYZCKgwfQqP43VjxpAY3tmG686KiUdw3PF3Pqt446uMtc6-Ktg"));
 
     auto arrayFromBase64 = browserMessageBuilder()->getArrayFromBase64(base64FromArray);
     QCOMPARE(arrayFromBase64.size(), bufSize);
@@ -160,9 +160,9 @@ void TestPasskeys::testDecodeResponseData()
     auto clientDataByteArray = browserMessageBuilder()->getArrayFromBase64(clientDataJson);
     auto clientDataJsonObject = browserMessageBuilder()->getJsonObject(clientDataByteArray);
     QCOMPARE(clientDataJsonObject["challenge"],
-             QString("lVeHzVxWsr8MQxMkZF0ti6FXhdgMljqKzgA-q_zk2Mnii3eJ47VF97sqUoYktVC85WAZ1uIASm-a_lDFZwsLfw"));
-    QCOMPARE(clientDataJsonObject["origin"], QString("https://webauthn.io"));
-    QCOMPARE(clientDataJsonObject["type"], QString("webauthn.create"));
+             QStringLiteral("lVeHzVxWsr8MQxMkZF0ti6FXhdgMljqKzgA-q_zk2Mnii3eJ47VF97sqUoYktVC85WAZ1uIASm-a_lDFZwsLfw"));
+    QCOMPARE(clientDataJsonObject["origin"], QStringLiteral("https://webauthn.io"));
+    QCOMPARE(clientDataJsonObject["type"], QStringLiteral("webauthn.create"));
 
     // Parse attestationObject (CBOR decoding needed)
     BrowserCbor browserCbor;
@@ -181,15 +181,15 @@ void TestPasskeys::testDecodeResponseData()
 
     // The attestationObject should include the same ID after decoding with the response root
     QCOMPARE(credentialData["credentialId"].toString(), publicKeyCredential["id"].toString());
-    QCOMPARE(credentialData["aaguid"].toString(), QString("_bFBsl2ERD6KNUaYwgWlAg"));
-    QCOMPARE(authData["rpIdHash"].toString(), QString("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
+    QCOMPARE(credentialData["aaguid"].toString(), QStringLiteral("_bFBsl2ERD6KNUaYwgWlAg"));
+    QCOMPARE(authData["rpIdHash"].toString(), QStringLiteral("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
     QCOMPARE(flags["AT"], true);
     QCOMPARE(flags["UP"], true);
     QCOMPARE(publicKey["1"], 2);
     QCOMPARE(publicKey["3"], -7);
     QCOMPARE(publicKey["-1"], 1);
-    QCOMPARE(publicKey["-2"], QString("BuyvNFtikWFtGVkDplAqyjHElahp5fCH5dS4Ms0Ihd0"));
-    QCOMPARE(publicKey["-3"], QString("4u5_6Q8O6R0Hg0oDCdtCJLEL0yX_GDLhU5m3HUIE54M"));
+    QCOMPARE(publicKey["-2"], QStringLiteral("BuyvNFtikWFtGVkDplAqyjHElahp5fCH5dS4Ms0Ihd0"));
+    QCOMPARE(publicKey["-3"], QStringLiteral("4u5_6Q8O6R0Hg0oDCdtCJLEL0yX_GDLhU5m3HUIE54M"));
 }
 
 void TestPasskeys::testLoadingECPrivateKeyFromPem()
@@ -199,7 +199,7 @@ void TestPasskeys::testLoadingECPrivateKeyFromPem()
 #endif
     const auto publicKeyCredentialRequestOptions =
         browserMessageBuilder()->getJsonObject(PublicKeyCredentialRequestOptions.toUtf8());
-    const auto privateKeyPem = QString("-----BEGIN PRIVATE KEY-----"
+    const auto privateKeyPem = QStringLiteral("-----BEGIN PRIVATE KEY-----"
                                        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg5DX2R6I37nMSZqCp"
                                        "XfHlE3UeitkGGE03FqGsdfxIBoOhRANCAAQG7K80W2KRYW0ZWQOmUCrKMcSVqGnl"
                                        "8Ifl1LgyzQiF3eLuf+kPDukdB4NKAwnbQiSxC9Ml/xgy4VOZtx1CBOeD"
@@ -215,12 +215,12 @@ void TestPasskeys::testLoadingECPrivateKeyFromPem()
     const auto signature = browserPasskeys()->buildSignature(authenticatorData, clientData, privateKeyPem);
     QCOMPARE(
         browserMessageBuilder()->getBase64FromArray(signature),
-        QString("MEYCIQCpbDaYJ4b2ofqWBxfRNbH3XCpsyao7Iui5lVuJRU9HIQIhAPl5moNZgJu5zmurkKK_P900Ct6wd3ahVIqCEqTeeRdE"));
+        QStringLiteral("MEYCIQCpbDaYJ4b2ofqWBxfRNbH3XCpsyao7Iui5lVuJRU9HIQIhAPl5moNZgJu5zmurkKK_P900Ct6wd3ahVIqCEqTeeRdE"));
 }
 
 void TestPasskeys::testLoadingRSAPrivateKeyFromPem()
 {
-    const auto privateKeyPem = QString("-----BEGIN PRIVATE KEY-----"
+    const auto privateKeyPem = QStringLiteral("-----BEGIN PRIVATE KEY-----"
                                        "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC5OHjBHQaRfxxX\n4WHRmqq7e7JgT"
                                        "FRs1bd4dIOFAOZnhNE3vAg2IF5VurmeB+9ye9xh7frw8ubrL0cv\nsBWiJfN5CY3SYGRLbGTtBC0fZ6"
                                        "OhhhjwvVM1GW6nVeRU66atzuo4NBfYXJWIYECd\npRBU4+xsDL4vJnn1mj05+v/Tqp6Uo1HrEPx9+Dc"
@@ -255,7 +255,7 @@ void TestPasskeys::testLoadingRSAPrivateKeyFromPem()
     const auto signature = browserPasskeys()->buildSignature(authenticatorData, clientData, privateKeyPem);
     QCOMPARE(
         browserMessageBuilder()->getBase64FromArray(signature),
-        QString("MOGw6KrerCgPf2mPig7FOTFIUDXYAU1v2uZj89_NgQTg2UddWnAB3JId3pa4zXghj8CkjjadVOI_LvweJGCEpmPQnRby71yFXnja6j"
+        QStringLiteral("MOGw6KrerCgPf2mPig7FOTFIUDXYAU1v2uZj89_NgQTg2UddWnAB3JId3pa4zXghj8CkjjadVOI_LvweJGCEpmPQnRby71yFXnja6j"
                 "Y3woX2b2klG2fB2alGZHHrVg6yVEmnAii4kYSdmoWxI7SmzLftoZfCJNFPFHujx2Pbr-6dIB02sZhtncetT0cpyWobtj9r7C5dIGfm"
                 "J5n-LccP-F9gXGqtbN605VrIkC2WNztjdk3dAt5FGM_dlIwSe-vP1dKfIuNqAEbgr2IVZAUFn_ZfzUo-XbXTysksuz9JZfEopJBiUi"
                 "9tjQDNvrYQFqB6wDPqkZAomkbRCohUb3TzCg"));
@@ -264,17 +264,17 @@ void TestPasskeys::testLoadingRSAPrivateKeyFromPem()
 void TestPasskeys::testCreatingAttestationObjectWithEC()
 {
     // Predefined values for a desired outcome
-    const auto id = QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
-    const auto predefinedFirst = QString("BuyvNFtikWFtGVkDplAqyjHElahp5fCH5dS4Ms0Ihd0");
-    const auto predefinedSecond = QString("4u5_6Q8O6R0Hg0oDCdtCJLEL0yX_GDLhU5m3HUIE54M");
+    const auto id = QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
+    const auto predefinedFirst = QStringLiteral("BuyvNFtikWFtGVkDplAqyjHElahp5fCH5dS4Ms0Ihd0");
+    const auto predefinedSecond = QStringLiteral("4u5_6Q8O6R0Hg0oDCdtCJLEL0yX_GDLhU5m3HUIE54M");
 
     const auto publicKeyCredentialOptions = browserMessageBuilder()->getJsonObject(PublicKeyCredentialOptions.toUtf8());
     QJsonObject credentialCreationOptions;
     browserPasskeysClient()->getCredentialCreationOptions(
-        publicKeyCredentialOptions, QString("https://webauthn.io"), &credentialCreationOptions);
+        publicKeyCredentialOptions, QStringLiteral("https://webauthn.io"), &credentialCreationOptions);
 
-    auto rpIdHash = browserMessageBuilder()->getSha256HashAsBase64(QString("webauthn.io"));
-    QCOMPARE(rpIdHash, QString("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
+    auto rpIdHash = browserMessageBuilder()->getSha256HashAsBase64(QStringLiteral("webauthn.io"));
+    QCOMPARE(rpIdHash, QStringLiteral("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
 
     TestingVariables testingVariables = {id, predefinedFirst, predefinedSecond};
     const auto alg = browserPasskeys()->getAlgorithmFromPublicKey(credentialCreationOptions);
@@ -309,8 +309,8 @@ void TestPasskeys::testCreatingAttestationObjectWithEC()
     auto publicKey = credentialData["publicKey"].toObject();
 
     // The attestationObject should include the same ID after decoding with the response root
-    QCOMPARE(credentialData["credentialId"].toString(), QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8"));
-    QCOMPARE(authData["rpIdHash"].toString(), QString("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
+    QCOMPARE(credentialData["credentialId"].toString(), QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8"));
+    QCOMPARE(authData["rpIdHash"].toString(), QStringLiteral("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
     QCOMPARE(flags["AT"], true);
     QCOMPARE(flags["UP"], true);
     QCOMPARE(publicKey["1"], WebAuthnCoseKeyType::EC2);
@@ -323,13 +323,13 @@ void TestPasskeys::testCreatingAttestationObjectWithEC()
 void TestPasskeys::testCreatingAttestationObjectWithRSA()
 {
     // Predefined values for a desired outcome
-    const auto id = QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
-    const auto predefinedModulus = QString("vUhOZnyn8yn7U-nuHlsXZ6WDWLuYvevWWnwtoHxDEQq27vlp7yAfeVvAPkcvhxRcwoCEUespoa5"
+    const auto id = QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
+    const auto predefinedModulus = QStringLiteral("vUhOZnyn8yn7U-nuHlsXZ6WDWLuYvevWWnwtoHxDEQq27vlp7yAfeVvAPkcvhxRcwoCEUespoa5"
                                            "5IDbkpp2Ypd6b15KbB4C-_4gM4r2FK9gfXghLPAXsMhstYv4keNFb4ghdlY5oUU3JCqUSMyOpmd"
                                            "HeX-RikLL0wgGv_tLT2DaDiWeyQCAtiDblr6COuTAU2kTpLc3Bn35geV9Iqw4iT8DwBQ-f8vjnI"
                                            "EDANXKUiRPojfy1q7WwEl-zMv6Ke2jFHxf68u82BSy3u9DOQaa24FAHoCm8Yd0n5IazMyoxyttl"
                                            "tRt8un8myVOGxcXMiR9_kQb9pu1RRLQMQLd-icE1Qw");
-    const auto predefinedExponent = QString("AQAB");
+    const auto predefinedExponent = QStringLiteral("AQAB");
 
     // Force algorithm to RSA
     QJsonArray pubKeyCredParams;
@@ -338,11 +338,11 @@ void TestPasskeys::testCreatingAttestationObjectWithRSA()
     const auto publicKeyCredentialOptions = browserMessageBuilder()->getJsonObject(PublicKeyCredentialOptions.toUtf8());
     QJsonObject credentialCreationOptions;
     browserPasskeysClient()->getCredentialCreationOptions(
-        publicKeyCredentialOptions, QString("https://webauthn.io"), &credentialCreationOptions);
+        publicKeyCredentialOptions, QStringLiteral("https://webauthn.io"), &credentialCreationOptions);
     credentialCreationOptions["credTypesAndPubKeyAlgs"] = pubKeyCredParams;
 
-    auto rpIdHash = browserMessageBuilder()->getSha256HashAsBase64(QString("webauthn.io"));
-    QCOMPARE(rpIdHash, QString("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
+    auto rpIdHash = browserMessageBuilder()->getSha256HashAsBase64(QStringLiteral("webauthn.io"));
+    QCOMPARE(rpIdHash, QStringLiteral("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
 
     TestingVariables testingVariables = {id, predefinedModulus, predefinedExponent};
     const auto alg = browserPasskeys()->getAlgorithmFromPublicKey(credentialCreationOptions);
@@ -366,8 +366,8 @@ void TestPasskeys::testCreatingAttestationObjectWithRSA()
     auto publicKey = credentialData["publicKey"].toObject();
 
     // The attestationObject should include the same ID after decoding with the response root
-    QCOMPARE(credentialData["credentialId"].toString(), QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8"));
-    QCOMPARE(authData["rpIdHash"].toString(), QString("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
+    QCOMPARE(credentialData["credentialId"].toString(), QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8"));
+    QCOMPARE(authData["rpIdHash"].toString(), QStringLiteral("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvA"));
     QCOMPARE(flags["AT"], true);
     QCOMPARE(flags["UP"], true);
     QCOMPARE(publicKey["1"], WebAuthnCoseKeyType::RSA);
@@ -379,10 +379,10 @@ void TestPasskeys::testCreatingAttestationObjectWithRSA()
 void TestPasskeys::testRegister()
 {
     // Predefined values for a desired outcome
-    const auto predefinedId = QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
-    const auto predefinedX = QString("BuyvNFtikWFtGVkDplAqyjHElahp5fCH5dS4Ms0Ihd0");
-    const auto predefinedY = QString("4u5_6Q8O6R0Hg0oDCdtCJLEL0yX_GDLhU5m3HUIE54M");
-    const auto origin = QString("https://webauthn.io");
+    const auto predefinedId = QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
+    const auto predefinedX = QStringLiteral("BuyvNFtikWFtGVkDplAqyjHElahp5fCH5dS4Ms0Ihd0");
+    const auto predefinedY = QStringLiteral("4u5_6Q8O6R0Hg0oDCdtCJLEL0yX_GDLhU5m3HUIE54M");
+    const auto origin = QStringLiteral("https://webauthn.io");
     const auto testDataPublicKey = browserMessageBuilder()->getJsonObject(PublicKeyCredential.toUtf8());
     const auto testDataResponse = testDataPublicKey["response"];
     const auto publicKeyCredentialOptions = browserMessageBuilder()->getJsonObject(PublicKeyCredentialOptions.toUtf8());
@@ -395,9 +395,9 @@ void TestPasskeys::testRegister()
     TestingVariables testingVariables = {predefinedId, predefinedX, predefinedY};
     auto result = browserPasskeys()->buildRegisterPublicKeyCredential(credentialCreationOptions, testingVariables);
     auto publicKeyCredential = result.response;
-    QCOMPARE(publicKeyCredential["type"], QString("public-key"));
-    QCOMPARE(publicKeyCredential["authenticatorAttachment"], QString("platform"));
-    QCOMPARE(publicKeyCredential["id"], QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8"));
+    QCOMPARE(publicKeyCredential["type"], QStringLiteral("public-key"));
+    QCOMPARE(publicKeyCredential["authenticatorAttachment"], QStringLiteral("platform"));
+    QCOMPARE(publicKeyCredential["id"], QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8"));
 
     auto response = publicKeyCredential["response"].toObject();
     auto attestationObject = response["attestationObject"].toString();
@@ -408,9 +408,9 @@ void TestPasskeys::testRegister()
     auto clientDataByteArray = browserMessageBuilder()->getArrayFromBase64(clientDataJson);
     auto clientDataJsonObject = browserMessageBuilder()->getJsonObject(clientDataByteArray);
     QCOMPARE(clientDataJsonObject["challenge"],
-             QString("lVeHzVxWsr8MQxMkZF0ti6FXhdgMljqKzgA-q_zk2Mnii3eJ47VF97sqUoYktVC85WAZ1uIASm-a_lDFZwsLfw"));
+             QStringLiteral("lVeHzVxWsr8MQxMkZF0ti6FXhdgMljqKzgA-q_zk2Mnii3eJ47VF97sqUoYktVC85WAZ1uIASm-a_lDFZwsLfw"));
     QCOMPARE(clientDataJsonObject["origin"], origin);
-    QCOMPARE(clientDataJsonObject["type"], QString("webauthn.create"));
+    QCOMPARE(clientDataJsonObject["type"], QStringLiteral("webauthn.create"));
 }
 
 void TestPasskeys::testGet()
@@ -418,13 +418,13 @@ void TestPasskeys::testGet()
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2, 14, 0)
     QSKIP("ECDSA Signature is broken on Botan < 2.14.0");
 #endif
-    const auto privateKeyPem = QString("-----BEGIN PRIVATE KEY-----"
+    const auto privateKeyPem = QStringLiteral("-----BEGIN PRIVATE KEY-----"
                                        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg5DX2R6I37nMSZqCp"
                                        "XfHlE3UeitkGGE03FqGsdfxIBoOhRANCAAQG7K80W2KRYW0ZWQOmUCrKMcSVqGnl"
                                        "8Ifl1LgyzQiF3eLuf+kPDukdB4NKAwnbQiSxC9Ml/xgy4VOZtx1CBOeD"
                                        "-----END PRIVATE KEY-----");
-    const auto origin = QString("https://webauthn.io");
-    const auto id = QString("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
+    const auto origin = QStringLiteral("https://webauthn.io");
+    const auto id = QStringLiteral("yrzFJ5lwcpTwYMOdXSmxF5b5cYQlqBMzbbU_d-oFLO8");
     const auto publicKeyCredentialRequestOptions =
         browserMessageBuilder()->getJsonObject(PublicKeyCredentialRequestOptions.toUtf8());
 
@@ -438,14 +438,14 @@ void TestPasskeys::testGet()
     QCOMPARE(publicKeyCredential["id"].toString(), id);
 
     auto response = publicKeyCredential["response"].toObject();
-    QCOMPARE(response["authenticatorData"].toString(), QString("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvAFAAAAAA"));
+    QCOMPARE(response["authenticatorData"].toString(), QStringLiteral("dKbqkhPJnC90siSSsyDPQCYqlMGpUKA5fyklC2CEHvAFAAAAAA"));
     QCOMPARE(response["clientDataJSON"].toString(),
-             QString("eyJjaGFsbGVuZ2UiOiI5ejM2dlRmUVRMOTVMZjdXblpneXRlN29oR2VGLVhSaUx4a0wtTHVHVTF6b3BSbU1JVUExTFZ3ekdwe"
+             QStringLiteral("eyJjaGFsbGVuZ2UiOiI5ejM2dlRmUVRMOTVMZjdXblpneXRlN29oR2VGLVhSaUx4a0wtTHVHVTF6b3BSbU1JVUExTFZ3ekdwe"
                      "UltMWZPQm4xUW5SYTBRSDI3QURBYUpHSHlzUSIsImNyb3NzT3JpZ2luIjpmYWxzZSwib3JpZ2luIjoiaHR0cHM6Ly93ZWJhdX"
                      "Robi5pbyIsInR5cGUiOiJ3ZWJhdXRobi5nZXQifQ"));
     QCOMPARE(
         response["signature"].toString(),
-        QString("MEUCIHFv0lOOGGloi_XoH5s3QDSs__8yAp9ZTMEjNiacMpOxAiEA04LAfO6TE7j12XNxd3zHQpn4kZN82jQFPntPiPBSD5c"));
+        QStringLiteral("MEUCIHFv0lOOGGloi_XoH5s3QDSs__8yAp9ZTMEjNiacMpOxAiEA04LAfO6TE7j12XNxd3zHQpn4kZN82jQFPntPiPBSD5c"));
 
     auto clientDataJson = response["clientDataJSON"].toString();
     auto clientDataByteArray = browserMessageBuilder()->getArrayFromBase64(clientDataJson);
@@ -529,12 +529,12 @@ void TestPasskeys::testEntry()
     entry->setGroup(root);
 
     browserService()->addPasskeyToEntry(entry,
-                                        QString("example.com"),
-                                        QString("example.com"),
-                                        QString("username"),
-                                        QString("userId"),
-                                        QString("userHandle"),
-                                        QString("privateKey"));
+                                        QStringLiteral("example.com"),
+                                        QStringLiteral("example.com"),
+                                        QStringLiteral("username"),
+                                        QStringLiteral("userId"),
+                                        QStringLiteral("userHandle"),
+                                        QStringLiteral("privateKey"));
 
     QVERIFY(entry->hasPasskey());
 }
@@ -553,81 +553,81 @@ void TestPasskeys::testIsDomain()
 // List from https://html.spec.whatwg.org/multipage/browsers.html#is-a-registrable-domain-suffix-of-or-is-equal-to
 void TestPasskeys::testRegistrableDomainSuffix()
 {
-    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QString("example.com"), QString("example.com")));
-    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QString("example.com"), QString("example.com.")));
-    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QString("example.com."), QString("example.com")));
-    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QString("example.com"), QString("www.example.com")));
-    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QString("com"), QString("example.com")));
-    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QString("example"), QString("example")));
+    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("example.com"), QStringLiteral("example.com")));
+    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("example.com"), QStringLiteral("example.com.")));
+    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("example.com."), QStringLiteral("example.com")));
+    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("example.com"), QStringLiteral("www.example.com")));
+    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("com"), QStringLiteral("example.com")));
+    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("example"), QStringLiteral("example")));
     QVERIFY(
-        !passkeyUtils()->isRegistrableDomainSuffix(QString("s3.amazonaws.com"), QString("example.s3.amazonaws.com")));
-    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QString("example.compute.amazonaws.com"),
-                                                       QString("www.example.compute.amazonaws.com")));
-    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QString("amazonaws.com"),
-                                                       QString("www.example.compute.amazonaws.com")));
-    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QString("amazonaws.com"), QString("test.amazonaws.com")));
+        !passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("s3.amazonaws.com"), QStringLiteral("example.s3.amazonaws.com")));
+    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("example.compute.amazonaws.com"),
+                                                       QStringLiteral("www.example.compute.amazonaws.com")));
+    QVERIFY(!passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("amazonaws.com"),
+                                                       QStringLiteral("www.example.compute.amazonaws.com")));
+    QVERIFY(passkeyUtils()->isRegistrableDomainSuffix(QStringLiteral("amazonaws.com"), QStringLiteral("test.amazonaws.com")));
 }
 
 void TestPasskeys::testRpIdValidation()
 {
     QString result;
-    auto allowedIdentical = passkeyUtils()->validateRpId(QString("example.com"), QString("example.com"), &result);
-    QCOMPARE(result, QString("example.com"));
+    auto allowedIdentical = passkeyUtils()->validateRpId(QStringLiteral("example.com"), QStringLiteral("example.com"), &result);
+    QCOMPARE(result, QStringLiteral("example.com"));
     QVERIFY(allowedIdentical == 0);
 
     result.clear();
-    auto allowedSubdomain = passkeyUtils()->validateRpId(QString("example.com"), QString("www.example.com"), &result);
-    QCOMPARE(result, QString("example.com"));
+    auto allowedSubdomain = passkeyUtils()->validateRpId(QStringLiteral("example.com"), QStringLiteral("www.example.com"), &result);
+    QCOMPARE(result, QStringLiteral("example.com"));
     QVERIFY(allowedSubdomain == 0);
 
     result.clear();
-    auto emptyRpId = passkeyUtils()->validateRpId({}, QString("example.com"), &result);
-    QCOMPARE(result, QString(""));
+    auto emptyRpId = passkeyUtils()->validateRpId({}, QStringLiteral("example.com"), &result);
+    QCOMPARE(result, QString());
     QVERIFY(emptyRpId == ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 
     result.clear();
-    auto ipRpId = passkeyUtils()->validateRpId(QString("127.0.0.1"), QString("example.com"), &result);
-    QCOMPARE(result, QString(""));
+    auto ipRpId = passkeyUtils()->validateRpId(QStringLiteral("127.0.0.1"), QStringLiteral("example.com"), &result);
+    QCOMPARE(result, QString());
     QVERIFY(ipRpId == ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 
     result.clear();
-    auto emptyOrigin = passkeyUtils()->validateRpId(QString("example.com"), QString(""), &result);
+    auto emptyOrigin = passkeyUtils()->validateRpId(QStringLiteral("example.com"), QString(), &result);
     QVERIFY(result.isEmpty());
     QCOMPARE(emptyOrigin, ERROR_PASSKEYS_ORIGIN_NOT_ALLOWED);
 
     result.clear();
-    auto ipOrigin = passkeyUtils()->validateRpId(QString("example.com"), QString("127.0.0.1"), &result);
+    auto ipOrigin = passkeyUtils()->validateRpId(QStringLiteral("example.com"), QStringLiteral("127.0.0.1"), &result);
     QVERIFY(result.isEmpty());
     QCOMPARE(ipOrigin, ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 
     result.clear();
-    auto invalidRpId = passkeyUtils()->validateRpId(QString(".com"), QString("example.com"), &result);
+    auto invalidRpId = passkeyUtils()->validateRpId(QStringLiteral(".com"), QStringLiteral("example.com"), &result);
     QVERIFY(result.isEmpty());
     QCOMPARE(invalidRpId, ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 
     result.clear();
-    auto malformedOrigin = passkeyUtils()->validateRpId(QString("example.com."), QString("example.com."), &result);
+    auto malformedOrigin = passkeyUtils()->validateRpId(QStringLiteral("example.com."), QStringLiteral("example.com."), &result);
     QVERIFY(result.isEmpty());
     QCOMPARE(malformedOrigin, ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 
     result.clear();
-    auto malformed = passkeyUtils()->validateRpId(QString("...com."), QString("example...com"), &result);
+    auto malformed = passkeyUtils()->validateRpId(QStringLiteral("...com."), QStringLiteral("example...com"), &result);
     QVERIFY(result.isEmpty());
     QCOMPARE(malformed, ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 
     result.clear();
-    auto differentDomain = passkeyUtils()->validateRpId(QString("another.com"), QString("example.com"), &result);
+    auto differentDomain = passkeyUtils()->validateRpId(QStringLiteral("another.com"), QStringLiteral("example.com"), &result);
     QVERIFY(result.isEmpty());
     QCOMPARE(differentDomain, ERROR_PASSKEYS_DOMAIN_RPID_MISMATCH);
 }
 
 void TestPasskeys::testParseAttestation()
 {
-    QVERIFY(passkeyUtils()->parseAttestation(QString("")) == QString("none"));
-    QVERIFY(passkeyUtils()->parseAttestation(QString("direct")) == QString("direct"));
-    QVERIFY(passkeyUtils()->parseAttestation(QString("none")) == QString("none"));
-    QVERIFY(passkeyUtils()->parseAttestation(QString("indirect")) == QString("none"));
-    QVERIFY(passkeyUtils()->parseAttestation(QString("invalidvalue")) == QString("none"));
+    QVERIFY(passkeyUtils()->parseAttestation(QString()) == QStringLiteral("none"));
+    QVERIFY(passkeyUtils()->parseAttestation(QStringLiteral("direct")) == QStringLiteral("direct"));
+    QVERIFY(passkeyUtils()->parseAttestation(QStringLiteral("none")) == QStringLiteral("none"));
+    QVERIFY(passkeyUtils()->parseAttestation(QStringLiteral("indirect")) == QStringLiteral("none"));
+    QVERIFY(passkeyUtils()->parseAttestation(QStringLiteral("invalidvalue")) == QStringLiteral("none"));
 }
 
 void TestPasskeys::testParseCredentialTypes()
@@ -651,7 +651,7 @@ void TestPasskeys::testParseCredentialTypes()
     auto partiallyInvalidResponse = passkeyUtils()->parseCredentialTypes(partiallyInvalidPubKeyCredParams);
     QVERIFY(partiallyInvalidResponse != validPubKeyCredParams);
     QVERIFY(partiallyInvalidResponse.size() == 1);
-    QVERIFY(partiallyInvalidResponse.first()["type"].toString() == QString("public-key"));
+    QVERIFY(partiallyInvalidResponse.first()["type"].toString() == QStringLiteral("public-key"));
     QVERIFY(partiallyInvalidResponse.first()["alg"].toInt() == -257);
 
     auto emptyResponse = passkeyUtils()->parseCredentialTypes({});

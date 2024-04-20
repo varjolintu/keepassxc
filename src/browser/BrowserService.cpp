@@ -596,7 +596,7 @@ QString BrowserService::storeKey(const QString& key)
 
     hideWindow();
     db->metadata()->customData()->set(CustomData::BrowserKeyPrefix + id, key);
-    db->metadata()->customData()->set(QString("%1_%2").arg(CustomData::Created, id),
+    db->metadata()->customData()->set(QStringLiteral("%1_%2").arg(CustomData::Created, id),
                                       QLocale::system().toString(Clock::currentDateTime(), QLocale::ShortFormat));
     return id;
 }
@@ -1585,7 +1585,7 @@ void BrowserService::databaseLocked(DatabaseWidget* dbWidget)
 {
     if (dbWidget) {
         QJsonObject msg;
-        msg["action"] = QString("database-locked");
+        msg["action"] = QStringLiteral("database-locked");
         m_browserHost->broadcastClientMessage(msg);
     }
 }
@@ -1599,7 +1599,7 @@ void BrowserService::databaseUnlocked(DatabaseWidget* dbWidget)
         }
 
         QJsonObject msg;
-        msg["action"] = QString("database-unlocked");
+        msg["action"] = QStringLiteral("database-unlocked");
         m_browserHost->broadcastClientMessage(msg);
     }
 }

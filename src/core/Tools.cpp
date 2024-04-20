@@ -141,7 +141,7 @@ namespace Tools
             i++;
         }
 
-        return QString("%1 %2").arg(QLocale().toString(size, 'f', precision), units.at(i));
+        return QStringLiteral("%1 %2").arg(QLocale().toString(size, 'f', precision), units.at(i));
     }
 
     QString humanReadableTimeDifference(qint64 seconds)
@@ -461,13 +461,13 @@ namespace Tools
         QFileInfo dbFileInfo(databasePath);
         QString baseName = dbFileInfo.completeBaseName();
 
-        pattern.replace(QString("{DB_FILENAME}"), baseName);
+        pattern.replace(QStringLiteral("{DB_FILENAME}"), baseName);
 
         auto re = QRegularExpression(R"(\{TIME(?::([^\\]*))?\})");
         auto match = re.match(pattern);
         while (match.hasMatch()) {
             // Extract time format specifier
-            auto formatSpecifier = QString("dd_MM_yyyy_hh-mm-ss");
+            auto formatSpecifier = QStringLiteral("dd_MM_yyyy_hh-mm-ss");
             if (!match.captured(1).isEmpty()) {
                 formatSpecifier = match.captured(1);
             }

@@ -378,26 +378,26 @@ void TestGroup::testClone()
     QVERIFY(!clonedGroup->parentGroup());
     QVERIFY(!clonedGroup->database());
     QVERIFY(clonedGroup->uuid() != originalGroup->uuid());
-    QCOMPARE(clonedGroup->name(), QString("Group"));
+    QCOMPARE(clonedGroup->name(), QStringLiteral("Group"));
     QCOMPARE(clonedGroup->iconNumber(), 42);
     QCOMPARE(clonedGroup->children().size(), 1);
     QCOMPARE(clonedGroup->entries().size(), 1);
 
     Entry* clonedGroupEntry = clonedGroup->entries().at(0);
     QVERIFY(clonedGroupEntry->uuid() != originalGroupEntry->uuid());
-    QCOMPARE(clonedGroupEntry->title(), QString("GroupEntry"));
+    QCOMPARE(clonedGroupEntry->title(), QStringLiteral("GroupEntry"));
     QCOMPARE(clonedGroupEntry->iconNumber(), 43);
     QCOMPARE(clonedGroupEntry->historyItems().size(), 0);
 
     Group* clonedSubGroup = clonedGroup->children().at(0);
     QVERIFY(clonedSubGroup->uuid() != subGroup->uuid());
-    QCOMPARE(clonedSubGroup->name(), QString("SubGroup"));
+    QCOMPARE(clonedSubGroup->name(), QStringLiteral("SubGroup"));
     QCOMPARE(clonedSubGroup->children().size(), 0);
     QCOMPARE(clonedSubGroup->entries().size(), 1);
 
     Entry* clonedSubGroupEntry = clonedSubGroup->entries().at(0);
     QVERIFY(clonedSubGroupEntry->uuid() != subGroupEntry->uuid());
-    QCOMPARE(clonedSubGroupEntry->title(), QString("SubGroupEntry"));
+    QCOMPARE(clonedSubGroupEntry->title(), QStringLiteral("SubGroupEntry"));
 
     QScopedPointer<Group> clonedGroupKeepUuid(originalGroup->clone(Entry::CloneNoFlags));
     QCOMPARE(clonedGroupKeepUuid->entries().at(0)->uuid(), originalGroupEntry->uuid());
@@ -477,7 +477,7 @@ void TestGroup::testFindEntry()
     QScopedPointer<Database> db(new Database());
 
     auto entry1 = new Entry();
-    entry1->setTitle(QString("entry1"));
+    entry1->setTitle(QStringLiteral("entry1"));
     entry1->setGroup(db->rootGroup());
     entry1->setUuid(QUuid::createUuid());
 
@@ -486,7 +486,7 @@ void TestGroup::testFindEntry()
 
     auto entry2 = new Entry();
 
-    entry2->setTitle(QString("entry2"));
+    entry2->setTitle(QStringLiteral("entry2"));
     entry2->setGroup(group1);
     entry2->setUuid(QUuid::createUuid());
 
@@ -496,46 +496,46 @@ void TestGroup::testFindEntry()
 
     entry = db->rootGroup()->findEntryByUuid(entry1->uuid());
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry1"));
+    QCOMPARE(entry->title(), QStringLiteral("entry1"));
 
-    entry = db->rootGroup()->findEntryByPath(QString("entry1"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("entry1"));
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry1"));
+    QCOMPARE(entry->title(), QStringLiteral("entry1"));
 
     // We also can find the entry with the leading slash.
-    entry = db->rootGroup()->findEntryByPath(QString("/entry1"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("/entry1"));
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry1"));
+    QCOMPARE(entry->title(), QStringLiteral("entry1"));
 
     // But two slashes should not be accepted.
-    entry = db->rootGroup()->findEntryByPath(QString("//entry1"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("//entry1"));
     QVERIFY(!entry);
 
     entry = db->rootGroup()->findEntryByUuid(entry2->uuid());
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry2"));
+    QCOMPARE(entry->title(), QStringLiteral("entry2"));
 
-    entry = db->rootGroup()->findEntryByPath(QString("group1/entry2"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("group1/entry2"));
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry2"));
+    QCOMPARE(entry->title(), QStringLiteral("entry2"));
 
-    entry = db->rootGroup()->findEntryByPath(QString("/entry2"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("/entry2"));
     QVERIFY(!entry);
 
     // We also can find the entry with the leading slash.
-    entry = db->rootGroup()->findEntryByPath(QString("/group1/entry2"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("/group1/entry2"));
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry2"));
+    QCOMPARE(entry->title(), QStringLiteral("entry2"));
 
     // Should also find the entry only by title.
-    entry = db->rootGroup()->findEntryByPath(QString("entry2"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("entry2"));
     QVERIFY(entry);
-    QCOMPARE(entry->title(), QString("entry2"));
+    QCOMPARE(entry->title(), QStringLiteral("entry2"));
 
-    entry = db->rootGroup()->findEntryByPath(QString("invalid/path/to/entry2"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("invalid/path/to/entry2"));
     QVERIFY(!entry);
 
-    entry = db->rootGroup()->findEntryByPath(QString("entry27"));
+    entry = db->rootGroup()->findEntryByPath(QStringLiteral("entry27"));
     QVERIFY(!entry);
 
     // A valid UUID that does not exist in this database.
@@ -621,25 +621,25 @@ void TestGroup::testPrint()
     QScopedPointer<Database> db(new Database());
 
     QString output = db->rootGroup()->print();
-    QCOMPARE(output, QString("[empty]\n"));
+    QCOMPARE(output, QStringLiteral("[empty]\n"));
 
     output = db->rootGroup()->print(true);
-    QCOMPARE(output, QString("[empty]\n"));
+    QCOMPARE(output, QStringLiteral("[empty]\n"));
 
     auto entry1 = new Entry();
-    entry1->setTitle(QString("entry1"));
+    entry1->setTitle(QStringLiteral("entry1"));
     entry1->setGroup(db->rootGroup());
     entry1->setUuid(QUuid::createUuid());
 
     output = db->rootGroup()->print();
-    QCOMPARE(output, QString("entry1\n"));
+    QCOMPARE(output, QStringLiteral("entry1\n"));
 
     auto group1 = new Group();
     group1->setName("group1");
     group1->setParent(db->rootGroup());
 
     auto entry2 = new Entry();
-    entry2->setTitle(QString("entry2"));
+    entry2->setTitle(QStringLiteral("entry2"));
     entry2->setGroup(group1);
     entry2->setUuid(QUuid::createUuid());
 
@@ -652,41 +652,41 @@ void TestGroup::testPrint()
     subGroup->setParent(group2);
 
     auto entry3 = new Entry();
-    entry3->setTitle(QString("entry3"));
+    entry3->setTitle(QStringLiteral("entry3"));
     entry3->setGroup(subGroup);
     entry3->setUuid(QUuid::createUuid());
 
     output = db->rootGroup()->print();
-    QVERIFY(output.contains(QString("entry1\n")));
-    QVERIFY(output.contains(QString("group1/\n")));
-    QVERIFY(!output.contains(QString("  entry2\n")));
-    QVERIFY(output.contains(QString("group2/\n")));
-    QVERIFY(!output.contains(QString("  subgroup\n")));
+    QVERIFY(output.contains(QStringLiteral("entry1\n")));
+    QVERIFY(output.contains(QStringLiteral("group1/\n")));
+    QVERIFY(!output.contains(QStringLiteral("  entry2\n")));
+    QVERIFY(output.contains(QStringLiteral("group2/\n")));
+    QVERIFY(!output.contains(QStringLiteral("  subgroup\n")));
 
     output = db->rootGroup()->print(true);
-    QVERIFY(output.contains(QString("entry1\n")));
-    QVERIFY(output.contains(QString("group1/\n")));
-    QVERIFY(output.contains(QString("  entry2\n")));
-    QVERIFY(output.contains(QString("group2/\n")));
-    QVERIFY(output.contains(QString("  subgroup/\n")));
-    QVERIFY(output.contains(QString("    entry3\n")));
+    QVERIFY(output.contains(QStringLiteral("entry1\n")));
+    QVERIFY(output.contains(QStringLiteral("group1/\n")));
+    QVERIFY(output.contains(QStringLiteral("  entry2\n")));
+    QVERIFY(output.contains(QStringLiteral("group2/\n")));
+    QVERIFY(output.contains(QStringLiteral("  subgroup/\n")));
+    QVERIFY(output.contains(QStringLiteral("    entry3\n")));
 
     output = db->rootGroup()->print(true, true);
-    QVERIFY(output.contains(QString("entry1\n")));
-    QVERIFY(output.contains(QString("group1/\n")));
-    QVERIFY(output.contains(QString("group1/entry2\n")));
-    QVERIFY(output.contains(QString("group2/\n")));
-    QVERIFY(output.contains(QString("group2/subgroup/\n")));
-    QVERIFY(output.contains(QString("group2/subgroup/entry3\n")));
+    QVERIFY(output.contains(QStringLiteral("entry1\n")));
+    QVERIFY(output.contains(QStringLiteral("group1/\n")));
+    QVERIFY(output.contains(QStringLiteral("group1/entry2\n")));
+    QVERIFY(output.contains(QStringLiteral("group2/\n")));
+    QVERIFY(output.contains(QStringLiteral("group2/subgroup/\n")));
+    QVERIFY(output.contains(QStringLiteral("group2/subgroup/entry3\n")));
 
     output = group1->print();
-    QVERIFY(!output.contains(QString("group1/\n")));
-    QVERIFY(output.contains(QString("entry2\n")));
+    QVERIFY(!output.contains(QStringLiteral("group1/\n")));
+    QVERIFY(output.contains(QStringLiteral("entry2\n")));
 
     output = group2->print(true, true);
-    QVERIFY(!output.contains(QString("group2/\n")));
-    QVERIFY(output.contains(QString("subgroup/\n")));
-    QVERIFY(output.contains(QString("subgroup/entry3\n")));
+    QVERIFY(!output.contains(QStringLiteral("group2/\n")));
+    QVERIFY(output.contains(QStringLiteral("subgroup/\n")));
+    QVERIFY(output.contains(QStringLiteral("subgroup/entry3\n")));
 }
 
 void TestGroup::testAddEntryWithPath()
@@ -883,27 +883,27 @@ void TestGroup::testChildrenSort()
     parent->sortChildrenRecursively();
     QList<Group*> children = parent->children();
     QCOMPARE(children.size(), 10);
-    QCOMPARE(children[0]->name(), QString("045"));
-    QCOMPARE(children[1]->name(), QString("04test"));
-    QCOMPARE(children[2]->name(), QString("60"));
-    QCOMPARE(children[3]->name(), QString("A"));
-    QCOMPARE(children[4]->name(), QString("B"));
-    QCOMPARE(children[5]->name(), QString("e"));
-    QCOMPARE(children[6]->name(), QString("i"));
-    QCOMPARE(children[7]->name(), QString("Test12"));
-    QCOMPARE(children[8]->name(), QString("Test999"));
-    QCOMPARE(children[9]->name(), QString("z"));
+    QCOMPARE(children[0]->name(), QStringLiteral("045"));
+    QCOMPARE(children[1]->name(), QStringLiteral("04test"));
+    QCOMPARE(children[2]->name(), QStringLiteral("60"));
+    QCOMPARE(children[3]->name(), QStringLiteral("A"));
+    QCOMPARE(children[4]->name(), QStringLiteral("B"));
+    QCOMPARE(children[5]->name(), QStringLiteral("e"));
+    QCOMPARE(children[6]->name(), QStringLiteral("i"));
+    QCOMPARE(children[7]->name(), QStringLiteral("Test12"));
+    QCOMPARE(children[8]->name(), QStringLiteral("Test999"));
+    QCOMPARE(children[9]->name(), QStringLiteral("z"));
     children = subParent->children();
     QCOMPARE(children.size(), 9);
-    QCOMPARE(children[0]->name(), QString("sub_000"));
-    QCOMPARE(children[1]->name(), QString("sub_010"));
-    QCOMPARE(children[2]->name(), QString("sub_45p"));
-    QCOMPARE(children[3]->name(), QString("sub_6p"));
-    QCOMPARE(children[4]->name(), QString("sub_M"));
-    QCOMPARE(children[5]->name(), QString("sub_p"));
-    QCOMPARE(children[6]->name(), QString("sub_t0"));
-    QCOMPARE(children[7]->name(), QString("sub_tt"));
-    QCOMPARE(children[8]->name(), QString("sub_xte"));
+    QCOMPARE(children[0]->name(), QStringLiteral("sub_000"));
+    QCOMPARE(children[1]->name(), QStringLiteral("sub_010"));
+    QCOMPARE(children[2]->name(), QStringLiteral("sub_45p"));
+    QCOMPARE(children[3]->name(), QStringLiteral("sub_6p"));
+    QCOMPARE(children[4]->name(), QStringLiteral("sub_M"));
+    QCOMPARE(children[5]->name(), QStringLiteral("sub_p"));
+    QCOMPARE(children[6]->name(), QStringLiteral("sub_t0"));
+    QCOMPARE(children[7]->name(), QStringLiteral("sub_tt"));
+    QCOMPARE(children[8]->name(), QStringLiteral("sub_xte"));
     delete parent;
 
     parent = createTestGroupWithUnorderedChildren();
@@ -911,27 +911,27 @@ void TestGroup::testChildrenSort()
     parent->sortChildrenRecursively(true);
     children = parent->children();
     QCOMPARE(children.size(), 10);
-    QCOMPARE(children[0]->name(), QString("z"));
-    QCOMPARE(children[1]->name(), QString("Test999"));
-    QCOMPARE(children[2]->name(), QString("Test12"));
-    QCOMPARE(children[3]->name(), QString("i"));
-    QCOMPARE(children[4]->name(), QString("e"));
-    QCOMPARE(children[5]->name(), QString("B"));
-    QCOMPARE(children[6]->name(), QString("A"));
-    QCOMPARE(children[7]->name(), QString("60"));
-    QCOMPARE(children[8]->name(), QString("04test"));
-    QCOMPARE(children[9]->name(), QString("045"));
+    QCOMPARE(children[0]->name(), QStringLiteral("z"));
+    QCOMPARE(children[1]->name(), QStringLiteral("Test999"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Test12"));
+    QCOMPARE(children[3]->name(), QStringLiteral("i"));
+    QCOMPARE(children[4]->name(), QStringLiteral("e"));
+    QCOMPARE(children[5]->name(), QStringLiteral("B"));
+    QCOMPARE(children[6]->name(), QStringLiteral("A"));
+    QCOMPARE(children[7]->name(), QStringLiteral("60"));
+    QCOMPARE(children[8]->name(), QStringLiteral("04test"));
+    QCOMPARE(children[9]->name(), QStringLiteral("045"));
     children = subParent->children();
     QCOMPARE(children.size(), 9);
-    QCOMPARE(children[0]->name(), QString("sub_xte"));
-    QCOMPARE(children[1]->name(), QString("sub_tt"));
-    QCOMPARE(children[2]->name(), QString("sub_t0"));
-    QCOMPARE(children[3]->name(), QString("sub_p"));
-    QCOMPARE(children[4]->name(), QString("sub_M"));
-    QCOMPARE(children[5]->name(), QString("sub_6p"));
-    QCOMPARE(children[6]->name(), QString("sub_45p"));
-    QCOMPARE(children[7]->name(), QString("sub_010"));
-    QCOMPARE(children[8]->name(), QString("sub_000"));
+    QCOMPARE(children[0]->name(), QStringLiteral("sub_xte"));
+    QCOMPARE(children[1]->name(), QStringLiteral("sub_tt"));
+    QCOMPARE(children[2]->name(), QStringLiteral("sub_t0"));
+    QCOMPARE(children[3]->name(), QStringLiteral("sub_p"));
+    QCOMPARE(children[4]->name(), QStringLiteral("sub_M"));
+    QCOMPARE(children[5]->name(), QStringLiteral("sub_6p"));
+    QCOMPARE(children[6]->name(), QStringLiteral("sub_45p"));
+    QCOMPARE(children[7]->name(), QStringLiteral("sub_010"));
+    QCOMPARE(children[8]->name(), QStringLiteral("sub_000"));
     delete parent;
 
     parent = createTestGroupWithUnorderedChildren();
@@ -939,27 +939,27 @@ void TestGroup::testChildrenSort()
     subParent->sortChildrenRecursively();
     children = parent->children();
     QCOMPARE(children.size(), 10);
-    QCOMPARE(children[0]->name(), QString("B"));
-    QCOMPARE(children[1]->name(), QString("e"));
-    QCOMPARE(children[2]->name(), QString("Test999"));
-    QCOMPARE(children[3]->name(), QString("A"));
-    QCOMPARE(children[4]->name(), QString("z"));
-    QCOMPARE(children[5]->name(), QString("045"));
-    QCOMPARE(children[6]->name(), QString("60"));
-    QCOMPARE(children[7]->name(), QString("04test"));
-    QCOMPARE(children[8]->name(), QString("Test12"));
-    QCOMPARE(children[9]->name(), QString("i"));
+    QCOMPARE(children[0]->name(), QStringLiteral("B"));
+    QCOMPARE(children[1]->name(), QStringLiteral("e"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Test999"));
+    QCOMPARE(children[3]->name(), QStringLiteral("A"));
+    QCOMPARE(children[4]->name(), QStringLiteral("z"));
+    QCOMPARE(children[5]->name(), QStringLiteral("045"));
+    QCOMPARE(children[6]->name(), QStringLiteral("60"));
+    QCOMPARE(children[7]->name(), QStringLiteral("04test"));
+    QCOMPARE(children[8]->name(), QStringLiteral("Test12"));
+    QCOMPARE(children[9]->name(), QStringLiteral("i"));
     children = subParent->children();
     QCOMPARE(children.size(), 9);
-    QCOMPARE(children[0]->name(), QString("sub_000"));
-    QCOMPARE(children[1]->name(), QString("sub_010"));
-    QCOMPARE(children[2]->name(), QString("sub_45p"));
-    QCOMPARE(children[3]->name(), QString("sub_6p"));
-    QCOMPARE(children[4]->name(), QString("sub_M"));
-    QCOMPARE(children[5]->name(), QString("sub_p"));
-    QCOMPARE(children[6]->name(), QString("sub_t0"));
-    QCOMPARE(children[7]->name(), QString("sub_tt"));
-    QCOMPARE(children[8]->name(), QString("sub_xte"));
+    QCOMPARE(children[0]->name(), QStringLiteral("sub_000"));
+    QCOMPARE(children[1]->name(), QStringLiteral("sub_010"));
+    QCOMPARE(children[2]->name(), QStringLiteral("sub_45p"));
+    QCOMPARE(children[3]->name(), QStringLiteral("sub_6p"));
+    QCOMPARE(children[4]->name(), QStringLiteral("sub_M"));
+    QCOMPARE(children[5]->name(), QStringLiteral("sub_p"));
+    QCOMPARE(children[6]->name(), QStringLiteral("sub_t0"));
+    QCOMPARE(children[7]->name(), QStringLiteral("sub_tt"));
+    QCOMPARE(children[8]->name(), QStringLiteral("sub_xte"));
     delete parent;
 
     parent = createTestGroupWithUnorderedChildren();
@@ -967,27 +967,27 @@ void TestGroup::testChildrenSort()
     subParent->sortChildrenRecursively(true);
     children = parent->children();
     QCOMPARE(children.size(), 10);
-    QCOMPARE(children[0]->name(), QString("B"));
-    QCOMPARE(children[1]->name(), QString("e"));
-    QCOMPARE(children[2]->name(), QString("Test999"));
-    QCOMPARE(children[3]->name(), QString("A"));
-    QCOMPARE(children[4]->name(), QString("z"));
-    QCOMPARE(children[5]->name(), QString("045"));
-    QCOMPARE(children[6]->name(), QString("60"));
-    QCOMPARE(children[7]->name(), QString("04test"));
-    QCOMPARE(children[8]->name(), QString("Test12"));
-    QCOMPARE(children[9]->name(), QString("i"));
+    QCOMPARE(children[0]->name(), QStringLiteral("B"));
+    QCOMPARE(children[1]->name(), QStringLiteral("e"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Test999"));
+    QCOMPARE(children[3]->name(), QStringLiteral("A"));
+    QCOMPARE(children[4]->name(), QStringLiteral("z"));
+    QCOMPARE(children[5]->name(), QStringLiteral("045"));
+    QCOMPARE(children[6]->name(), QStringLiteral("60"));
+    QCOMPARE(children[7]->name(), QStringLiteral("04test"));
+    QCOMPARE(children[8]->name(), QStringLiteral("Test12"));
+    QCOMPARE(children[9]->name(), QStringLiteral("i"));
     children = subParent->children();
     QCOMPARE(children.size(), 9);
-    QCOMPARE(children[0]->name(), QString("sub_xte"));
-    QCOMPARE(children[1]->name(), QString("sub_tt"));
-    QCOMPARE(children[2]->name(), QString("sub_t0"));
-    QCOMPARE(children[3]->name(), QString("sub_p"));
-    QCOMPARE(children[4]->name(), QString("sub_M"));
-    QCOMPARE(children[5]->name(), QString("sub_6p"));
-    QCOMPARE(children[6]->name(), QString("sub_45p"));
-    QCOMPARE(children[7]->name(), QString("sub_010"));
-    QCOMPARE(children[8]->name(), QString("sub_000"));
+    QCOMPARE(children[0]->name(), QStringLiteral("sub_xte"));
+    QCOMPARE(children[1]->name(), QStringLiteral("sub_tt"));
+    QCOMPARE(children[2]->name(), QStringLiteral("sub_t0"));
+    QCOMPARE(children[3]->name(), QStringLiteral("sub_p"));
+    QCOMPARE(children[4]->name(), QStringLiteral("sub_M"));
+    QCOMPARE(children[5]->name(), QStringLiteral("sub_6p"));
+    QCOMPARE(children[6]->name(), QStringLiteral("sub_45p"));
+    QCOMPARE(children[7]->name(), QStringLiteral("sub_010"));
+    QCOMPARE(children[8]->name(), QStringLiteral("sub_000"));
     delete parent;
 }
 

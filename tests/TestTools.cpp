@@ -43,7 +43,7 @@ void TestTools::testHumanReadableFileSize()
     QCOMPARE(createDecimal("1", "00", "MiB"), humanReadableFileSize(kibibyte * kibibyte));
     QCOMPARE(createDecimal("1", "00", "GiB"), humanReadableFileSize(kibibyte * kibibyte * kibibyte));
 
-    QCOMPARE(QString("100 B"), humanReadableFileSize(100, 0));
+    QCOMPARE(QStringLiteral("100 B"), humanReadableFileSize(100, 0));
     QCOMPARE(createDecimal("1", "10", "KiB"), humanReadableFileSize(kibibyte + 100));
     QCOMPARE(createDecimal("1", "001", "KiB"), humanReadableFileSize(kibibyte + 1, 3));
     QCOMPARE(createDecimal("15", "00", "KiB"), humanReadableFileSize(kibibyte * 15));
@@ -86,18 +86,18 @@ void TestTools::testEnvSubstitute()
     environment.insert("USERPROFILE", "C:\\Users\\User");
 
     QCOMPARE(Tools::envSubstitute("%HOMEDRIVE%%HOMEPATH%\\.ssh\\id_rsa", environment),
-             QString("C:\\Users\\User\\.ssh\\id_rsa"));
-    QCOMPARE(Tools::envSubstitute("start%EMPTY%%EMPTY%%%HOMEDRIVE%%end", environment), QString("start%C:%end"));
+             QStringLiteral("C:\\Users\\User\\.ssh\\id_rsa"));
+    QCOMPARE(Tools::envSubstitute("start%EMPTY%%EMPTY%%%HOMEDRIVE%%end", environment), QStringLiteral("start%C:%end"));
     QCOMPARE(Tools::envSubstitute("%USERPROFILE%\\.ssh\\id_rsa", environment),
-             QString("C:\\Users\\User\\.ssh\\id_rsa"));
-    QCOMPARE(Tools::envSubstitute("~\\.ssh\\id_rsa", environment), QString("C:\\Users\\User\\.ssh\\id_rsa"));
+             QStringLiteral("C:\\Users\\User\\.ssh\\id_rsa"));
+    QCOMPARE(Tools::envSubstitute("~\\.ssh\\id_rsa", environment), QStringLiteral("C:\\Users\\User\\.ssh\\id_rsa"));
 #else
-    environment.insert("HOME", QString("/home/user"));
-    environment.insert("USER", QString("user"));
+    environment.insert("HOME", QStringLiteral("/home/user"));
+    environment.insert("USER", QStringLiteral("user"));
 
-    QCOMPARE(Tools::envSubstitute("~/.ssh/id_rsa", environment), QString("/home/user/.ssh/id_rsa"));
-    QCOMPARE(Tools::envSubstitute("$HOME/.ssh/id_rsa", environment), QString("/home/user/.ssh/id_rsa"));
-    QCOMPARE(Tools::envSubstitute("start/$EMPTY$$EMPTY$HOME/end", environment), QString("start/$/home/user/end"));
+    QCOMPARE(Tools::envSubstitute("~/.ssh/id_rsa", environment), QStringLiteral("/home/user/.ssh/id_rsa"));
+    QCOMPARE(Tools::envSubstitute("$HOME/.ssh/id_rsa", environment), QStringLiteral("/home/user/.ssh/id_rsa"));
+    QCOMPARE(Tools::envSubstitute("start/$EMPTY$$EMPTY$HOME/end", environment), QStringLiteral("start/$/home/user/end"));
 #endif
 }
 
@@ -133,9 +133,9 @@ void TestTools::testBackupFilePatternSubstitution_data()
     auto DEFAULT_FORMATTED_TIME = NOW.toString("dd_MM_yyyy_hh-mm-ss");
 
     QTest::newRow("Null pattern") << QString() << DEFAULT_DB_FILE_PATH << QString();
-    QTest::newRow("Empty pattern") << QString("") << DEFAULT_DB_FILE_PATH << QString("");
+    QTest::newRow("Empty pattern") << QString() << DEFAULT_DB_FILE_PATH << QString();
     QTest::newRow("Null database path") << "valid_pattern" << QString() << QString();
-    QTest::newRow("Empty database path") << "valid_pattern" << QString("") << QString();
+    QTest::newRow("Empty database path") << "valid_pattern" << QString() << QString();
     QTest::newRow("Unclosed/invalid pattern") << "{DB_FILENAME" << DEFAULT_DB_FILE_PATH << "{DB_FILENAME";
     QTest::newRow("Unknown pattern") << "{NO_MATCH}" << DEFAULT_DB_FILE_PATH << "{NO_MATCH}";
     QTest::newRow("Do not replace escaped patterns (filename)")
@@ -220,7 +220,7 @@ void TestTools::testConvertToRegex_data()
     QTest::addColumn<QString>("expected");
 
     QTest::newRow("No Options") << input << static_cast<int>(Tools::RegexConvertOpts::DEFAULT)
-                                << QString(R"(te|st*t?[5]^(test);',.)");
+                                << QStringLiteral(R"(te|st*t?[5]^(test);',.)");
     // Escape regex
     QTest::newRow("Escape Regex") << input << static_cast<int>(Tools::RegexConvertOpts::ESCAPE_REGEX)
                                   << Tools::escapeRegex(input);
@@ -230,22 +230,22 @@ void TestTools::testConvertToRegex_data()
 
     // Exact match does not escape the pattern
     QTest::newRow("Exact Match 1") << input << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH)
-                                 << QString(R"(^(?:te|st*t?[5]^(test);',.)$)");
+                                 << QStringLiteral(R"(^(?:te|st*t?[5]^(test);',.)$)");
 
     // Exact match with improper regex
     QTest::newRow("Exact Match 2") << ")av(" << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH)
-                                 << QString(R"(^(?:)av()$)");
+                                 << QStringLiteral(R"(^(?:)av()$)");
 
     QTest::newRow("Exact Match & Wildcard")
         << input << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH | Tools::RegexConvertOpts::WILDCARD_ALL)
-        << QString(R"(^(?:te|st.*t.\[5\]\^\(test\)\;\'\,\.)$)");
+        << QStringLiteral(R"(^(?:te|st.*t.\[5\]\^\(test\)\;\'\,\.)$)");
     QTest::newRow("Wildcard Single Match") << input << static_cast<int>(Tools::RegexConvertOpts::WILDCARD_SINGLE_MATCH)
-                                           << QString(R"(te\|st\*t.\[5\]\^\(test\)\;\'\,\.)");
+                                           << QStringLiteral(R"(te\|st\*t.\[5\]\^\(test\)\;\'\,\.)");
     QTest::newRow("Wildcard OR") << input << static_cast<int>(Tools::RegexConvertOpts::WILDCARD_LOGICAL_OR)
-                                 << QString(R"(te|st\*t\?\[5\]\^\(test\)\;\'\,\.)");
+                                 << QStringLiteral(R"(te|st\*t\?\[5\]\^\(test\)\;\'\,\.)");
     QTest::newRow("Wildcard Unlimited Match")
         << input << static_cast<int>(Tools::RegexConvertOpts::WILDCARD_UNLIMITED_MATCH)
-        << QString(R"(te\|st.*t\?\[5\]\^\(test\)\;\'\,\.)");
+        << QStringLiteral(R"(te\|st.*t\?\[5\]\^\(test\)\;\'\,\.)");
 }
 
 void TestTools::testArrayContainsValues()
@@ -260,7 +260,7 @@ void TestTools::testArrayContainsValues()
                                                                                 << "second"
                                                                                 << "none");
     QCOMPARE(result1.length(), 1);
-    QCOMPARE(result1.first(), QString("none"));
+    QCOMPARE(result1.first(), QStringLiteral("none"));
 
     // All found
     const auto result2 = Tools::getMissingValuesFromList<QString>(values,

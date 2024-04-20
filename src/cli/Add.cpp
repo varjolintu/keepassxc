@@ -47,13 +47,13 @@ const QCommandLineOption Add::GenerateOption = QCommandLineOption(QStringList() 
 
 Add::Add()
 {
-    name = QString("add");
+    name = QStringLiteral("add");
     description = QObject::tr("Add a new entry to a database.");
     options.append(Add::UsernameOption);
     options.append(Add::UrlOption);
     options.append(Add::NotesOption);
     options.append(Add::PasswordPromptOption);
-    positionalArguments.append({QString("entry"), QObject::tr("Path of the entry to add."), QString("")});
+    positionalArguments.append({QStringLiteral("entry"), QObject::tr("Path of the entry to add."), QString()});
 
     // Password generation options.
     options.append(Add::GenerateOption);

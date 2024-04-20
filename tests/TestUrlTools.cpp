@@ -33,19 +33,19 @@ void TestUrlTools::testTopLevelDomain()
 {
     // Create list of URLs and expected TLD responses
     QList<QPair<QString, QString>> tldUrls{
-        {QString("https://another.example.co.uk"), QString("co.uk")},
-        {QString("https://www.example.com"), QString("com")},
-        {QString("https://example.com"), QString("com")},
-        {QString("https://github.com"), QString("com")},
-        {QString("http://test.net"), QString("net")},
-        {QString("http://so.many.subdomains.co.jp"), QString("co.jp")},
-        {QString("https://192.168.0.1"), QString("192.168.0.1")},
-        {QString("https://192.168.0.1:8000"), QString("192.168.0.1")},
-        {QString("https://www.nic.ar"), QString("ar")},
-        {QString("https://no.no.no"), QString("no")},
-        {QString("https://www.blogspot.com.ar"), QString("blogspot.com.ar")}, // blogspot.com.ar is a TLD
-        {QString("https://jap.an.ide.kyoto.jp"), QString("ide.kyoto.jp")}, // ide.kyoto.jp is a TLD
-        {QString("ar"), QString("ar")},
+        {QStringLiteral("https://another.example.co.uk"), QStringLiteral("co.uk")},
+        {QStringLiteral("https://www.example.com"), QStringLiteral("com")},
+        {QStringLiteral("https://example.com"), QStringLiteral("com")},
+        {QStringLiteral("https://github.com"), QStringLiteral("com")},
+        {QStringLiteral("http://test.net"), QStringLiteral("net")},
+        {QStringLiteral("http://so.many.subdomains.co.jp"), QStringLiteral("co.jp")},
+        {QStringLiteral("https://192.168.0.1"), QStringLiteral("192.168.0.1")},
+        {QStringLiteral("https://192.168.0.1:8000"), QStringLiteral("192.168.0.1")},
+        {QStringLiteral("https://www.nic.ar"), QStringLiteral("ar")},
+        {QStringLiteral("https://no.no.no"), QStringLiteral("no")},
+        {QStringLiteral("https://www.blogspot.com.ar"), QStringLiteral("blogspot.com.ar")}, // blogspot.com.ar is a TLD
+        {QStringLiteral("https://jap.an.ide.kyoto.jp"), QStringLiteral("ide.kyoto.jp")}, // ide.kyoto.jp is a TLD
+        {QStringLiteral("ar"), QStringLiteral("ar")},
     };
 
     for (const auto& u : tldUrls) {
@@ -54,17 +54,17 @@ void TestUrlTools::testTopLevelDomain()
 
     // Create list of URLs and expected base URL responses
     QList<QPair<QString, QString>> baseUrls{
-        {QString("https://another.example.co.uk"), QString("example.co.uk")},
-        {QString("https://www.example.com"), QString("example.com")},
-        {QString("http://test.net"), QString("test.net")},
-        {QString("http://so.many.subdomains.co.jp"), QString("subdomains.co.jp")},
-        {QString("https://192.168.0.1"), QString("192.168.0.1")},
-        {QString("https://192.168.0.1:8000"), QString("192.168.0.1")},
-        {QString("https://www.nic.ar"), QString("nic.ar")},
-        {QString("https://www.blogspot.com.ar"), QString("www.blogspot.com.ar")}, // blogspot.com.ar is a TLD
-        {QString("https://www.arpa"), QString("www.arpa")},
-        {QString("https://jap.an.ide.kyoto.jp"), QString("an.ide.kyoto.jp")}, // ide.kyoto.jp is a TLD
-        {QString("https://kobe.jp"), QString("kobe.jp")},
+        {QStringLiteral("https://another.example.co.uk"), QStringLiteral("example.co.uk")},
+        {QStringLiteral("https://www.example.com"), QStringLiteral("example.com")},
+        {QStringLiteral("http://test.net"), QStringLiteral("test.net")},
+        {QStringLiteral("http://so.many.subdomains.co.jp"), QStringLiteral("subdomains.co.jp")},
+        {QStringLiteral("https://192.168.0.1"), QStringLiteral("192.168.0.1")},
+        {QStringLiteral("https://192.168.0.1:8000"), QStringLiteral("192.168.0.1")},
+        {QStringLiteral("https://www.nic.ar"), QStringLiteral("nic.ar")},
+        {QStringLiteral("https://www.blogspot.com.ar"), QStringLiteral("www.blogspot.com.ar")}, // blogspot.com.ar is a TLD
+        {QStringLiteral("https://www.arpa"), QStringLiteral("www.arpa")},
+        {QStringLiteral("https://jap.an.ide.kyoto.jp"), QStringLiteral("an.ide.kyoto.jp")}, // ide.kyoto.jp is a TLD
+        {QStringLiteral("https://kobe.jp"), QStringLiteral("kobe.jp")},
     };
 
     for (const auto& u : baseUrls) {

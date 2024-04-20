@@ -308,24 +308,24 @@ void TestBase32::testSanitizeInput()
     QByteArray encodedData = "JBSW Y3DP EB3W 64TM MQXC 4LQA";
     auto data = Base32::decode(Base32::sanitizeInput(encodedData));
     QVERIFY(!data.isEmpty());
-    QCOMPARE(QString(data.toStdString().c_str()), QString("Hello world..."));
+    QCOMPARE(QString(data.toStdString().c_str()), QStringLiteral("Hello world..."));
 
     // sanitize input (typo + missing padding)
     encodedData = "J8SWY3DPE83W64TMMQXC4LQA";
     data = Base32::decode(Base32::sanitizeInput(encodedData));
     QVERIFY(!data.isEmpty());
-    QCOMPARE(QString(data.toStdString().c_str()), QString("Hello world..."));
+    QCOMPARE(QString(data.toStdString().c_str()), QStringLiteral("Hello world..."));
 
     // sanitize input (other illegal characters)
     encodedData = "J8SWY3D[PE83W64TMMQ]XC!4LQA";
     data = Base32::decode(Base32::sanitizeInput(encodedData));
     QVERIFY(!data.isEmpty());
-    QCOMPARE(QString(data.toStdString().c_str()), QString("Hello world..."));
+    QCOMPARE(QString(data.toStdString().c_str()), QStringLiteral("Hello world..."));
 
     // sanitize input (NUL character)
     encodedData = "J8SWY3DPE83W64TMMQXC4LQA";
     encodedData.insert(3, '\0');
     data = Base32::decode(Base32::sanitizeInput(encodedData));
     QVERIFY(!data.isEmpty());
-    QCOMPARE(QString(data.toStdString().c_str()), QString("Hello world..."));
+    QCOMPARE(QString(data.toStdString().c_str()), QStringLiteral("Hello world..."));
 }

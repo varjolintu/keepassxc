@@ -67,13 +67,13 @@ void TestImports::testOPUX()
     entry = db->rootGroup()->findEntryByPath("/Personal/KeePassXC Logo");
     auto attachments = entry->attachments();
     QCOMPARE(attachments->keys().count(), 1);
-    QCOMPARE(attachments->keys()[0], QString("keepassxc.png"));
+    QCOMPARE(attachments->keys()[0], QStringLiteral("keepassxc.png"));
 
     // Confirm advanced attributes
     // NOTE: 1PUX does not support an explicit expiration field
     entry = db->rootGroup()->findEntryByPath("/Personal/Credit Card");
     QVERIFY(entry);
-    auto tmpl = QString("Credit Card Fields_%1");
+    auto tmpl = QStringLiteral("Credit Card Fields_%1");
     auto attr = entry->attributes();
     QCOMPARE(attr->value(tmpl.arg("cardholder name")), QStringLiteral("KeePassXC"));
     QCOMPARE(attr->value(tmpl.arg("expiry date")), QStringLiteral("202206"));

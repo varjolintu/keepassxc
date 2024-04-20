@@ -37,7 +37,7 @@
 EntryModel::EntryModel(QObject* parent)
     : QAbstractTableModel(parent)
     , m_group(nullptr)
-    , HiddenContentDisplay(QString("\u25cf").repeated(6))
+    , HiddenContentDisplay(QStringLiteral("\u25cf").repeated(6))
 {
     connect(config(), &Config::changed, this, &EntryModel::onConfigChanged);
 }
@@ -210,7 +210,7 @@ QVariant EntryModel::data(const QModelIndex& index, int role) const
                     result.append(attachment);
                     continue;
                 }
-                result.append(QString(", ") + attachment);
+                result.append(QStringLiteral(", ") + attachment);
             }
             return result;
         }

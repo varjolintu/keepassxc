@@ -34,12 +34,12 @@ const QCommandLineOption List::FlattenOption = QCommandLineOption(QStringList() 
 
 List::List()
 {
-    name = QString("ls");
+    name = QStringLiteral("ls");
     description = QObject::tr("List database entries.");
     options.append(List::RecursiveOption);
     options.append(List::FlattenOption);
     optionalArguments.append(
-        {QString("group"), QObject::tr("Path of the group to list. Default is /"), QString("[group]")});
+        {QStringLiteral("group"), QObject::tr("Path of the group to list. Default is /"), QStringLiteral("[group]")});
 }
 
 int List::executeWithDatabase(QSharedPointer<Database> database, QSharedPointer<QCommandLineParser> parser)

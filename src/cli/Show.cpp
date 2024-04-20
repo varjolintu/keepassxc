@@ -49,14 +49,14 @@ const QCommandLineOption Show::AttributesOption = QCommandLineOption(
 
 Show::Show()
 {
-    name = QString("show");
+    name = QStringLiteral("show");
     description = QObject::tr("Show an entry's information.");
     options.append(Show::TotpOption);
     options.append(Show::AttributesOption);
     options.append(Show::ProtectedAttributesOption);
     options.append(Show::AllAttributesOption);
     options.append(Show::AttachmentsOption);
-    positionalArguments.append({QString("entry"), QObject::tr("Name of the entry to show."), QString("")});
+    positionalArguments.append({QStringLiteral("entry"), QObject::tr("Name of the entry to show."), QString()});
 }
 
 int Show::executeWithDatabase(QSharedPointer<Database> database, QSharedPointer<QCommandLineParser> parser)

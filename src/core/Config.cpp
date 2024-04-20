@@ -61,7 +61,7 @@ static const QHash<Config::ConfigKey, ConfigDirective> configStrings = {
     {Config::AutoSaveOnExit,{QS("AutoSaveOnExit"), Roaming, true}},
     {Config::AutoSaveNonDataChanges,{QS("AutoSaveNonDataChanges"), Roaming, true}},
     {Config::BackupBeforeSave,{QS("BackupBeforeSave"), Roaming, false}},
-    {Config::BackupFilePathPattern,{QS("BackupFilePathPattern"), Roaming, QString("{DB_FILENAME}.old.kdbx")}},
+    {Config::BackupFilePathPattern,{QS("BackupFilePathPattern"), Roaming, QStringLiteral("{DB_FILENAME}.old.kdbx")}},
     {Config::UseAtomicSaves,{QS("UseAtomicSaves"), Roaming, true}},
     {Config::UseDirectWriteSaves,{QS("UseDirectWriteSaves"), Local, false}},
     {Config::SearchLimitGroup,{QS("SearchLimitGroup"), Roaming, false}},
@@ -485,7 +485,7 @@ void Config::init(const QString& configFileName, const QString& localConfigFileN
 #ifdef QT_DEBUG
         suffix = "_debug";
 #endif
-        oldLocalConfigPath += QString("/keepassxc%1.ini").arg(suffix);
+        oldLocalConfigPath += QStringLiteral("/keepassxc%1.ini").arg(suffix);
         oldLocalConfigPath = QDir::toNativeSeparators(oldLocalConfigPath);
         if (QFile::exists(oldLocalConfigPath)) {
             QDir().mkpath(QFileInfo(localConfigFileName).absolutePath());
@@ -553,8 +553,8 @@ QPair<QString, QString> Config::defaultConfigFiles()
     suffix = "_debug";
 #endif
 
-    configPath += QString("/keepassxc%1.ini").arg(suffix);
-    localConfigPath += QString("/keepassxc%1.ini").arg(suffix);
+    configPath += QStringLiteral("/keepassxc%1.ini").arg(suffix);
+    localConfigPath += QStringLiteral("/keepassxc%1.ini").arg(suffix);
 
     // Allow overriding the default location with env vars
     const auto& env = QProcessEnvironment::systemEnvironment();

@@ -967,7 +967,7 @@ void TestGuiFdoSecrets::testCollectionDelete()
     auto args = spyPromptCompleted.takeFirst();
     COMPARE(args.count(), 2);
     COMPARE(args.at(0).toBool(), false);
-    COMPARE(args.at(1).value<QDBusVariant>().variant().toString(), QStringLiteral(""));
+    COMPARE(args.at(1).value<QDBusVariant>().variant().toString(), QString());
 
     // however, the object should already be taken down from dbus
     {
@@ -1017,7 +1017,7 @@ void TestGuiFdoSecrets::testCollectionDeleteConcurrent()
         auto args = spyPromptCompleted.takeFirst();
         COMPARE(args.count(), 2);
         COMPARE(args.at(0).toBool(), false);
-        COMPARE(args.at(1).value<QDBusVariant>().variant().toString(), QStringLiteral(""));
+        COMPARE(args.at(1).value<QDBusVariant>().variant().toString(), QString());
     }
 
     VERIFY(waitForSignal(spyPromptCompleted2, 1));
@@ -1025,7 +1025,7 @@ void TestGuiFdoSecrets::testCollectionDeleteConcurrent()
         auto args = spyPromptCompleted2.takeFirst();
         COMPARE(args.count(), 2);
         COMPARE(args.at(0).toBool(), false);
-        COMPARE(args.at(1).value<QDBusVariant>().variant().toString(), QStringLiteral(""));
+        COMPARE(args.at(1).value<QDBusVariant>().variant().toString(), QString());
     }
 
     {
@@ -1407,7 +1407,7 @@ void TestGuiFdoSecrets::testItemSecret()
     {
         auto encrypted = encryptPassword(expected, APPLICATION_OCTET_STREAM, sess);
         DBUS_VERIFY(item->SetSecret(encrypted));
-        COMPARE(entry->password(), QStringLiteral(""));
+        COMPARE(entry->password(), QString());
     }
     {
         DBUS_GET(encrypted, item->GetSecret(QDBusObjectPath(sess->path())));
@@ -1450,7 +1450,7 @@ void TestGuiFdoSecrets::testItemDelete()
     auto args = spyPromptCompleted.takeFirst();
     COMPARE(args.count(), 2);
     COMPARE(args.at(0).toBool(), false);
-    COMPARE(args.at(1).toString(), QStringLiteral(""));
+    COMPARE(args.at(1).toString(), QString());
 
     VERIFY(waitForSignal(spyItemDeleted, 1));
     args = spyItemDeleted.takeFirst();

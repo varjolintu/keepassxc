@@ -55,14 +55,14 @@ void OpenSSHKeyGenDialog::typeChanged()
 {
     m_ui->bitsComboBox->clear();
 
-    if (m_ui->typeComboBox->currentText() == QString("Ed25519")) {
+    if (m_ui->typeComboBox->currentText() == QStringLiteral("Ed25519")) {
         m_ui->bitsComboBox->addItem("32");
-    } else if (m_ui->typeComboBox->currentText() == QString("RSA")) {
+    } else if (m_ui->typeComboBox->currentText() == QStringLiteral("RSA")) {
         m_ui->bitsComboBox->addItem("2048");
         m_ui->bitsComboBox->addItem("3072");
         m_ui->bitsComboBox->addItem("4096");
         m_ui->bitsComboBox->setCurrentText("3072");
-    } else if (m_ui->typeComboBox->currentText() == QString("ECDSA")) {
+    } else if (m_ui->typeComboBox->currentText() == QStringLiteral("ECDSA")) {
         m_ui->bitsComboBox->addItem("256");
         m_ui->bitsComboBox->addItem("384");
         m_ui->bitsComboBox->addItem("521");
@@ -78,11 +78,11 @@ void OpenSSHKeyGenDialog::accept()
 
     int bits = m_ui->bitsComboBox->currentText().toInt();
 
-    if (m_ui->typeComboBox->currentText() == QString("Ed25519")) {
+    if (m_ui->typeComboBox->currentText() == QStringLiteral("Ed25519")) {
         OpenSSHKeyGen::generateEd25519(*m_key);
-    } else if (m_ui->typeComboBox->currentText() == QString("RSA")) {
+    } else if (m_ui->typeComboBox->currentText() == QStringLiteral("RSA")) {
         OpenSSHKeyGen::generateRSA(*m_key, bits);
-    } else if (m_ui->typeComboBox->currentText() == QString("ECDSA")) {
+    } else if (m_ui->typeComboBox->currentText() == QStringLiteral("ECDSA")) {
         OpenSSHKeyGen::generateECDSA(*m_key, bits);
     } else {
         reject();

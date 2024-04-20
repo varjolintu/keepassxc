@@ -36,7 +36,7 @@ namespace
         QByteArray a;
         QBuffer buffer(&a);
         pixmap.save(&buffer, "PNG");
-        return QString("<img src=\"data:image/png;base64,") + a.toBase64() + "\"/>";
+        return QStringLiteral("<img src=\"data:image/png;base64,") + a.toBase64() + "\"/>";
     }
 
     QString formatEntry(const Entry& entry)
@@ -138,7 +138,7 @@ bool HtmlExporter::exportDatabase(QIODevice* device,
         return false;
     }
 
-    const auto header = QString("<html>"
+    const auto header = QStringLiteral("<html>"
                                 "<head>"
                                 "<meta charset=\"UTF-8\">"
                                 "<title>"
@@ -173,7 +173,7 @@ bool HtmlExporter::exportDatabase(QIODevice* device,
                                 + "</p>"
                                   "<p><code>"
                                 + db->filePath().toHtmlEscaped() + "</code></p>");
-    const auto footer = QString("</body>"
+    const auto footer = QStringLiteral("</body>"
                                 "</html>");
 
     if (device->write(header.toUtf8()) == -1) {
@@ -213,7 +213,7 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
     const auto notes = group.notes();
     if (!group.entries().empty() || !notes.isEmpty()) {
         // Header line
-        auto header = QString("<hr><h2>");
+        auto header = QStringLiteral("<hr><h2>");
         header.append(PixmapToHTML(Icons::groupIconPixmap(&group, IconSize::Medium)));
         header.append("&nbsp;");
         header.append(path);
@@ -234,7 +234,7 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
     }
 
     // Begin the table for the entries in this group
-    auto table = QString("<table width=\"95%\">");
+    auto table = QStringLiteral("<table width=\"95%\">");
 
     auto entries = group.entries();
     if (sorted) {

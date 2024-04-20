@@ -31,9 +31,9 @@ const QCommandLineOption Estimate::AdvancedOption =
 
 Estimate::Estimate()
 {
-    name = QString("estimate");
+    name = QStringLiteral("estimate");
     optionalArguments.append(
-        {QString("password"), QObject::tr("Password for which to estimate the entropy."), QString("[password]")});
+        {QStringLiteral("password"), QObject::tr("Password for which to estimate the entropy."), QStringLiteral("[password]")});
     options.append(Estimate::AdvancedOption);
     description = QObject::tr("Estimate the entropy of a password.");
 }

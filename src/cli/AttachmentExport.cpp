@@ -29,15 +29,15 @@ const QCommandLineOption AttachmentExport::StdoutOption =
 
 AttachmentExport::AttachmentExport()
 {
-    name = QString("attachment-export");
+    name = QStringLiteral("attachment-export");
     description = QObject::tr("Export an attachment of an entry.");
     options.append(AttachmentExport::StdoutOption);
     positionalArguments.append(
-        {QString("entry"), QObject::tr("Path of the entry with the target attachment."), QString("")});
+        {QStringLiteral("entry"), QObject::tr("Path of the entry with the target attachment."), QString()});
     positionalArguments.append(
-        {QString("attachment-name"), QObject::tr("Name of the attachment to be exported."), QString("")});
+        {QStringLiteral("attachment-name"), QObject::tr("Name of the attachment to be exported."), QString()});
     optionalArguments.append(
-        {QString("export-file"), QObject::tr("Path to which the attachment should be exported."), QString("")});
+        {QStringLiteral("export-file"), QObject::tr("Path to which the attachment should be exported."), QString()});
 }
 
 int AttachmentExport::executeWithDatabase(QSharedPointer<Database> database, QSharedPointer<QCommandLineParser> parser)

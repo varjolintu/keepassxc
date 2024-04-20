@@ -46,18 +46,18 @@ const QCommandLineOption Clip::BestMatchOption =
 
 Clip::Clip()
 {
-    name = QString("clip");
+    name = QStringLiteral("clip");
     description = QObject::tr("Copy an entry's attribute to the clipboard.");
     options.append(Clip::AttributeOption);
     options.append(Clip::TotpOption);
     options.append(Clip::BestMatchOption);
     positionalArguments.append(
-        {QString("entry"), QObject::tr("Path of the entry to clip.", "clip = copy to clipboard"), QString("")});
+        {QStringLiteral("entry"), QObject::tr("Path of the entry to clip.", "clip = copy to clipboard"), QString()});
     optionalArguments.append(
-        {QString("timeout"),
+        {QStringLiteral("timeout"),
          QObject::tr("Timeout before clearing the clipboard (default is %1 seconds, set to 0 for unlimited).")
              .arg(CLI_DEFAULT_CLIP_TIMEOUT),
-         QString("[timeout]")});
+         QStringLiteral("[timeout]")});
 }
 
 int Clip::executeWithDatabase(QSharedPointer<Database> database, QSharedPointer<QCommandLineParser> parser)
@@ -81,7 +81,7 @@ int Clip::executeWithDatabase(QSharedPointer<Database> database, QSharedPointer<
     if (parser->isSet(Clip::BestMatchOption)) {
         EntrySearcher searcher;
         const auto& searchTerm = args.at(1);
-        const auto results = searcher.search(QString("title:%1").arg(searchTerm), database->rootGroup(), true);
+        const auto results = searcher.search(QStringLiteral("title:%1").arg(searchTerm), database->rootGroup(), true);
         if (results.count() > 1) {
             err << QObject::tr("Multiple entries matching:") << Qt::endl;
             for (const Entry* result : results) {

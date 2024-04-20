@@ -36,7 +36,7 @@ void TestKeePass1Reader::initTestCase()
 {
     QVERIFY(Crypto::init());
 
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/basic.kdb");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/basic.kdb");
 
     KeePass1Reader reader;
     m_db = reader.readDatabase(filename, "masterpw", nullptr);
@@ -52,53 +52,53 @@ void TestKeePass1Reader::testBasic()
 
     Group* group1 = m_db->rootGroup()->children().at(0);
     QVERIFY(!group1->uuid().isNull());
-    QCOMPARE(group1->name(), QString("Internet"));
+    QCOMPARE(group1->name(), QStringLiteral("Internet"));
     QCOMPARE(group1->children().size(), 2);
     QCOMPARE(group1->entries().size(), 2);
     QCOMPARE(group1->iconNumber(), 1);
 
     Entry* entry11 = group1->entries().at(0);
     QVERIFY(!entry11->uuid().isNull());
-    QCOMPARE(entry11->title(), QString("Test entry"));
+    QCOMPARE(entry11->title(), QStringLiteral("Test entry"));
     QCOMPARE(entry11->iconNumber(), 1);
-    QCOMPARE(entry11->username(), QString("I"));
-    QCOMPARE(entry11->url(), QString("http://example.com/"));
-    QCOMPARE(entry11->password(), QString("secretpassword"));
-    QCOMPARE(entry11->notes(), QString("Lorem ipsum\ndolor sit amet"));
+    QCOMPARE(entry11->username(), QStringLiteral("I"));
+    QCOMPARE(entry11->url(), QStringLiteral("http://example.com/"));
+    QCOMPARE(entry11->password(), QStringLiteral("secretpassword"));
+    QCOMPARE(entry11->notes(), QStringLiteral("Lorem ipsum\ndolor sit amet"));
     QVERIFY(entry11->timeInfo().expires());
     QCOMPARE(entry11->timeInfo().expiryTime(), genDT(2012, 5, 9, 10, 32));
     QCOMPARE(entry11->attachments()->keys().size(), 1);
-    QCOMPARE(entry11->attachments()->keys().at(0), QString("attachment.txt"));
+    QCOMPARE(entry11->attachments()->keys().at(0), QStringLiteral("attachment.txt"));
     QCOMPARE(entry11->attachments()->value("attachment.txt"), QByteArray("hello world\n"));
 
     Entry* entry12 = group1->entries().at(1);
-    QCOMPARE(entry12->title(), QString(""));
+    QCOMPARE(entry12->title(), QString());
     QCOMPARE(entry12->iconNumber(), 0);
-    QCOMPARE(entry12->username(), QString(""));
-    QCOMPARE(entry12->url(), QString(""));
-    QCOMPARE(entry12->password(), QString(""));
-    QCOMPARE(entry12->notes(), QString(""));
+    QCOMPARE(entry12->username(), QString());
+    QCOMPARE(entry12->url(), QString());
+    QCOMPARE(entry12->password(), QString());
+    QCOMPARE(entry12->notes(), QString());
     QVERIFY(!entry12->timeInfo().expires());
     QCOMPARE(entry12->attachments()->keys().size(), 0);
 
     Group* group11 = group1->children().at(0);
-    QCOMPARE(group11->name(), QString("Subgroup 1"));
+    QCOMPARE(group11->name(), QStringLiteral("Subgroup 1"));
     QCOMPARE(group11->children().size(), 1);
 
     Group* group111 = group11->children().at(0);
-    QCOMPARE(group111->name(), QString("Unexpanded"));
+    QCOMPARE(group111->name(), QStringLiteral("Unexpanded"));
     QCOMPARE(group111->children().size(), 1);
 
     Group* group1111 = group111->children().at(0);
-    QCOMPARE(group1111->name(), QString("abc"));
+    QCOMPARE(group1111->name(), QStringLiteral("abc"));
     QCOMPARE(group1111->children().size(), 0);
 
     Group* group12 = group1->children().at(1);
-    QCOMPARE(group12->name(), QString("Subgroup 2"));
+    QCOMPARE(group12->name(), QStringLiteral("Subgroup 2"));
     QCOMPARE(group12->children().size(), 0);
 
     Group* group2 = m_db->rootGroup()->children().at(1);
-    QCOMPARE(group2->name(), QString("eMail"));
+    QCOMPARE(group2->name(), QStringLiteral("eMail"));
     QCOMPARE(group2->entries().size(), 1);
     QCOMPARE(group2->iconNumber(), 19);
 
@@ -135,40 +135,40 @@ void TestKeePass1Reader::testAutoType()
     QCOMPARE(group->entries().size(), 2);
 
     Entry* entry1 = group->entries().at(0);
-    QCOMPARE(entry1->notes(), QString("last line"));
-    QCOMPARE(entry1->defaultAutoTypeSequence(), QString("{USERNAME}{ENTER}"));
+    QCOMPARE(entry1->notes(), QStringLiteral("last line"));
+    QCOMPARE(entry1->defaultAutoTypeSequence(), QStringLiteral("{USERNAME}{ENTER}"));
     QCOMPARE(entry1->autoTypeAssociations()->size(), 5);
-    QCOMPARE(entry1->autoTypeAssociations()->get(0).sequence, QString(""));
-    QCOMPARE(entry1->autoTypeAssociations()->get(0).window, QString("a window"));
-    QCOMPARE(entry1->autoTypeAssociations()->get(1).sequence, QString(""));
-    QCOMPARE(entry1->autoTypeAssociations()->get(1).window, QString("a second window"));
-    QCOMPARE(entry1->autoTypeAssociations()->get(2).sequence, QString("{PASSWORD}{ENTER}"));
-    QCOMPARE(entry1->autoTypeAssociations()->get(2).window, QString("Window Nr 1a"));
-    QCOMPARE(entry1->autoTypeAssociations()->get(3).sequence, QString("{PASSWORD}{ENTER}"));
-    QCOMPARE(entry1->autoTypeAssociations()->get(3).window, QString("Window Nr 1b"));
-    QCOMPARE(entry1->autoTypeAssociations()->get(4).sequence, QString(""));
-    QCOMPARE(entry1->autoTypeAssociations()->get(4).window, QString("Window 2"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(0).sequence, QString());
+    QCOMPARE(entry1->autoTypeAssociations()->get(0).window, QStringLiteral("a window"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(1).sequence, QString());
+    QCOMPARE(entry1->autoTypeAssociations()->get(1).window, QStringLiteral("a second window"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(2).sequence, QStringLiteral("{PASSWORD}{ENTER}"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(2).window, QStringLiteral("Window Nr 1a"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(3).sequence, QStringLiteral("{PASSWORD}{ENTER}"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(3).window, QStringLiteral("Window Nr 1b"));
+    QCOMPARE(entry1->autoTypeAssociations()->get(4).sequence, QString());
+    QCOMPARE(entry1->autoTypeAssociations()->get(4).window, QStringLiteral("Window 2"));
 
     Entry* entry2 = group->entries().at(1);
-    QCOMPARE(entry2->notes(), QString("start line\nend line"));
-    QCOMPARE(entry2->defaultAutoTypeSequence(), QString(""));
+    QCOMPARE(entry2->notes(), QStringLiteral("start line\nend line"));
+    QCOMPARE(entry2->defaultAutoTypeSequence(), QString());
     QCOMPARE(entry2->autoTypeAssociations()->size(), 2);
-    QCOMPARE(entry2->autoTypeAssociations()->get(0).sequence, QString(""));
-    QCOMPARE(entry2->autoTypeAssociations()->get(0).window, QString("Main Window"));
-    QCOMPARE(entry2->autoTypeAssociations()->get(1).sequence, QString(""));
-    QCOMPARE(entry2->autoTypeAssociations()->get(1).window, QString("Test Window"));
+    QCOMPARE(entry2->autoTypeAssociations()->get(0).sequence, QString());
+    QCOMPARE(entry2->autoTypeAssociations()->get(0).window, QStringLiteral("Main Window"));
+    QCOMPARE(entry2->autoTypeAssociations()->get(1).sequence, QString());
+    QCOMPARE(entry2->autoTypeAssociations()->get(1).window, QStringLiteral("Test Window"));
 }
 
 void TestKeePass1Reader::testFileKey()
 {
     QFETCH(QString, type);
 
-    QString name = QString("FileKey").append(type);
+    QString name = QStringLiteral("FileKey").append(type);
 
     KeePass1Reader reader;
 
-    QString dbFilename = QString("%1/%2.kdb").arg(QString(KEEPASSX_TEST_DATA_DIR), name);
-    QString keyFilename = QString("%1/%2.key").arg(QString(KEEPASSX_TEST_DATA_DIR), name);
+    QString dbFilename = QStringLiteral("%1/%2.kdb").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), name);
+    QString keyFilename = QStringLiteral("%1/%2.key").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), name);
 
     auto db = reader.readDatabase(dbFilename, QString(), keyFilename);
     QVERIFY(db);
@@ -182,9 +182,9 @@ void TestKeePass1Reader::testFileKey()
 void TestKeePass1Reader::testFileKey_data()
 {
     QTest::addColumn<QString>("type");
-    QTest::newRow("Binary") << QString("Binary");
-    QTest::newRow("Hex") << QString("Hex");
-    QTest::newRow("Hashed") << QString("Hashed");
+    QTest::newRow("Binary") << QStringLiteral("Binary");
+    QTest::newRow("Hex") << QStringLiteral("Hex");
+    QTest::newRow("Hashed") << QStringLiteral("Hashed");
 }
 
 void TestKeePass1Reader::testCompositeKey()
@@ -193,8 +193,8 @@ void TestKeePass1Reader::testCompositeKey()
 
     KeePass1Reader reader;
 
-    QString dbFilename = QString("%1/%2.kdb").arg(QString(KEEPASSX_TEST_DATA_DIR), name);
-    QString keyFilename = QString("%1/FileKeyHex.key").arg(QString(KEEPASSX_TEST_DATA_DIR));
+    QString dbFilename = QStringLiteral("%1/%2.kdb").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), name);
+    QString keyFilename = QStringLiteral("%1/FileKeyHex.key").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR));
 
     auto db = reader.readDatabase(dbFilename, "mypassword", keyFilename);
     QVERIFY(db);
@@ -211,7 +211,7 @@ void TestKeePass1Reader::testTwofish()
 
     KeePass1Reader reader;
 
-    QString dbFilename = QString("%1/%2.kdb").arg(QString(KEEPASSX_TEST_DATA_DIR), name);
+    QString dbFilename = QStringLiteral("%1/%2.kdb").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), name);
 
     auto db = reader.readDatabase(dbFilename, "masterpw", nullptr);
     QVERIFY(db);
@@ -226,7 +226,7 @@ void TestKeePass1Reader::testCP1252Password()
 
     KeePass1Reader reader;
 
-    QString dbFilename = QString("%1/%2.kdb").arg(QString(KEEPASSX_TEST_DATA_DIR), name);
+    QString dbFilename = QStringLiteral("%1/%2.kdb").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), name);
     QString password = QString::fromUtf8("\xe2\x80\x9e\x70\x61\x73\x73\x77\x6f\x72\x64\xe2\x80\x9d");
 
     auto db = reader.readDatabase(dbFilename, password, nullptr);

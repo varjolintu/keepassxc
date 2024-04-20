@@ -333,7 +333,7 @@ void TestCsvParser::testUnicode()
     // ERROR QChar g("\u20AC");
     parser->setFieldSeparator(QChar('A'));
     QTextStream out(file.data());
-    out << QString("€1A2śA\"3śAż\"Ażac");
+    out << QStringLiteral("€1A2śA\"3śAż\"Ażac");
 
     QVERIFY(parser->parse(file.data()));
     t = parser->getCsvTable();

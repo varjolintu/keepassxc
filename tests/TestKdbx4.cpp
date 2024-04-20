@@ -131,7 +131,7 @@ void TestKdbx4Format::cleanup()
 
 void TestKdbx4Format::testFormat400()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/Format400.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/Format400.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("t"));
     KeePass2Reader reader;
@@ -141,15 +141,15 @@ void TestKdbx4Format::testFormat400()
     QVERIFY(db.data());
     QVERIFY(!reader.hasError());
 
-    QCOMPARE(db->rootGroup()->name(), QString("Format400"));
-    QCOMPARE(db->metadata()->name(), QString("Format400"));
+    QCOMPARE(db->rootGroup()->name(), QStringLiteral("Format400"));
+    QCOMPARE(db->metadata()->name(), QStringLiteral("Format400"));
     QCOMPARE(db->rootGroup()->entries().size(), 1);
     auto entry = db->rootGroup()->entries().at(0);
 
-    QCOMPARE(entry->title(), QString("Format400"));
-    QCOMPARE(entry->username(), QString("Format400"));
+    QCOMPARE(entry->title(), QStringLiteral("Format400"));
+    QCOMPARE(entry->username(), QStringLiteral("Format400"));
     QCOMPARE(entry->attributes()->keys().size(), 6);
-    QCOMPARE(entry->attributes()->value("Format400"), QString("Format400"));
+    QCOMPARE(entry->attributes()->value("Format400"), QStringLiteral("Format400"));
     QCOMPARE(entry->attachments()->keys().size(), 1);
     QCOMPARE(entry->attachments()->value("Format400"), QByteArray("Format400\n"));
 }
@@ -188,7 +188,7 @@ void TestKdbx4Format::testFormat400Upgrade()
     KeePass2Writer writer;
     writer.writeDatabase(&buffer, sourceDb.data());
     if (writer.hasError()) {
-        QFAIL(qPrintable(QString("Error while writing database: %1").arg(writer.errorString())));
+        QFAIL(qPrintable(QStringLiteral("Error while writing database: %1").arg(writer.errorString())));
     }
 
     // read buffer back
@@ -197,7 +197,7 @@ void TestKdbx4Format::testFormat400Upgrade()
     auto targetDb = QSharedPointer<Database>::create();
     reader.readDatabase(&buffer, key, targetDb.data());
     if (reader.hasError()) {
-        QFAIL(qPrintable(QString("Error while reading database: %1").arg(reader.errorString())));
+        QFAIL(qPrintable(QStringLiteral("Error while reading database: %1").arg(reader.errorString())));
     }
 
     QVERIFY(targetDb->rootGroup());
@@ -373,7 +373,7 @@ void TestKdbx4Format::testUpgradeMasterKeyIntegrity()
         entry->setUuid(QUuid::createUuid());
         entry->customData()->set("abc", "def");
     } else {
-        QFAIL(qPrintable(QString("Unknown action: %s").arg(upgradeAction)));
+        QFAIL(qPrintable(QStringLiteral("Unknown action: %s").arg(upgradeAction)));
     }
 
     QBuffer buffer;
@@ -407,18 +407,18 @@ void TestKdbx4Format::testUpgradeMasterKeyIntegrity_data()
     QTest::addColumn<QString>("upgradeAction");
     QTest::addColumn<quint32>("expectedVersion");
 
-    QTest::newRow("Upgrade: none") << QString("none") << KeePass2::FILE_VERSION_3_1;
-    QTest::newRow("Upgrade: none (meta-customdata)") << QString("meta-customdata") << KeePass2::FILE_VERSION_3_1;
-    QTest::newRow("Upgrade: none (explicit kdf-aes-kdbx3)") << QString("kdf-aes-kdbx3") << KeePass2::FILE_VERSION_3_1;
-    QTest::newRow("Upgrade (explicit): kdf-argon2") << QString("kdf-argon2") << KeePass2::FILE_VERSION_4;
-    QTest::newRow("Upgrade (explicit): kdf-aes-kdbx4") << QString("kdf-aes-kdbx4") << KeePass2::FILE_VERSION_4;
-    QTest::newRow("Upgrade (implicit): public-customdata") << QString("public-customdata") << KeePass2::FILE_VERSION_4;
+    QTest::newRow("Upgrade: none") << QStringLiteral("none") << KeePass2::FILE_VERSION_3_1;
+    QTest::newRow("Upgrade: none (meta-customdata)") << QStringLiteral("meta-customdata") << KeePass2::FILE_VERSION_3_1;
+    QTest::newRow("Upgrade: none (explicit kdf-aes-kdbx3)") << QStringLiteral("kdf-aes-kdbx3") << KeePass2::FILE_VERSION_3_1;
+    QTest::newRow("Upgrade (explicit): kdf-argon2") << QStringLiteral("kdf-argon2") << KeePass2::FILE_VERSION_4;
+    QTest::newRow("Upgrade (explicit): kdf-aes-kdbx4") << QStringLiteral("kdf-aes-kdbx4") << KeePass2::FILE_VERSION_4;
+    QTest::newRow("Upgrade (implicit): public-customdata") << QStringLiteral("public-customdata") << KeePass2::FILE_VERSION_4;
     QTest::newRow("Upgrade (implicit): rootgroup-customdata")
-        << QString("rootgroup-customdata") << KeePass2::FILE_VERSION_4;
-    QTest::newRow("Upgrade (implicit): group-customdata") << QString("group-customdata") << KeePass2::FILE_VERSION_4;
+        << QStringLiteral("rootgroup-customdata") << KeePass2::FILE_VERSION_4;
+    QTest::newRow("Upgrade (implicit): group-customdata") << QStringLiteral("group-customdata") << KeePass2::FILE_VERSION_4;
     QTest::newRow("Upgrade (implicit): rootentry-customdata")
-        << QString("rootentry-customdata") << KeePass2::FILE_VERSION_4;
-    QTest::newRow("Upgrade (implicit): entry-customdata") << QString("entry-customdata") << KeePass2::FILE_VERSION_4;
+        << QStringLiteral("rootentry-customdata") << KeePass2::FILE_VERSION_4;
+    QTest::newRow("Upgrade (implicit): entry-customdata") << QStringLiteral("entry-customdata") << KeePass2::FILE_VERSION_4;
 }
 
 void TestKdbx4Format::testAttachmentIndexStability()

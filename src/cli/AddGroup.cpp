@@ -25,9 +25,9 @@
 
 AddGroup::AddGroup()
 {
-    name = QString("mkdir");
+    name = QStringLiteral("mkdir");
     description = QObject::tr("Adds a new group to a database.");
-    positionalArguments.append({QString("group"), QObject::tr("Path of the group to add."), QString("")});
+    positionalArguments.append({QStringLiteral("group"), QObject::tr("Path of the group to add."), QString()});
 }
 
 AddGroup::~AddGroup() = default;

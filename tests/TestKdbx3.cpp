@@ -91,7 +91,7 @@ void TestKdbx3::writeKdbx(QIODevice* device, Database* db, bool& hasError, QStri
 
 void TestKdbx3::testFormat300()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/Format300.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/Format300.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("a"));
     KeePass2Reader reader;
@@ -101,13 +101,13 @@ void TestKdbx3::testFormat300()
     QVERIFY(db.data());
     QVERIFY(!reader.hasError());
 
-    QCOMPARE(db->rootGroup()->name(), QString("Format300"));
-    QCOMPARE(db->metadata()->name(), QString("Test Database Format 0x00030000"));
+    QCOMPARE(db->rootGroup()->name(), QStringLiteral("Format300"));
+    QCOMPARE(db->metadata()->name(), QStringLiteral("Test Database Format 0x00030000"));
 }
 
 void TestKdbx3::testNonAscii()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/NonAscii.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/NonAscii.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create(QString::fromUtf8("\xce\x94\xc3\xb6\xd8\xb6")));
     KeePass2Reader reader;
@@ -115,13 +115,13 @@ void TestKdbx3::testNonAscii()
     QVERIFY(db->open(filename, key, nullptr));
     QVERIFY(db.data());
     QVERIFY(!reader.hasError());
-    QCOMPARE(db->metadata()->name(), QString("NonAsciiTest"));
+    QCOMPARE(db->metadata()->name(), QStringLiteral("NonAsciiTest"));
     QCOMPARE(db->compressionAlgorithm(), Database::CompressionNone);
 }
 
 void TestKdbx3::testCompressed()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/Compressed.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/Compressed.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create(""));
     KeePass2Reader reader;
@@ -129,13 +129,13 @@ void TestKdbx3::testCompressed()
     QVERIFY(db->open(filename, key, nullptr));
     QVERIFY(db.data());
     QVERIFY(!reader.hasError());
-    QCOMPARE(db->metadata()->name(), QString("Compressed"));
+    QCOMPARE(db->metadata()->name(), QStringLiteral("Compressed"));
     QCOMPARE(db->compressionAlgorithm(), Database::CompressionGZip);
 }
 
 void TestKdbx3::testProtectedStrings()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/ProtectedStrings.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/ProtectedStrings.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("masterpw"));
     KeePass2Reader reader;
@@ -143,15 +143,15 @@ void TestKdbx3::testProtectedStrings()
     QVERIFY(db->open(filename, key, nullptr));
     QVERIFY(db.data());
     QVERIFY(!reader.hasError());
-    QCOMPARE(db->metadata()->name(), QString("Protected Strings Test"));
+    QCOMPARE(db->metadata()->name(), QStringLiteral("Protected Strings Test"));
 
     Entry* entry = db->rootGroup()->entries().at(0);
 
-    QCOMPARE(entry->title(), QString("Sample Entry"));
-    QCOMPARE(entry->username(), QString("Protected User Name"));
-    QCOMPARE(entry->password(), QString("ProtectedPassword"));
-    QCOMPARE(entry->attributes()->value("TestProtected"), QString("ABC"));
-    QCOMPARE(entry->attributes()->value("TestUnprotected"), QString("DEF"));
+    QCOMPARE(entry->title(), QStringLiteral("Sample Entry"));
+    QCOMPARE(entry->username(), QStringLiteral("Protected User Name"));
+    QCOMPARE(entry->password(), QStringLiteral("ProtectedPassword"));
+    QCOMPARE(entry->attributes()->value("TestProtected"), QStringLiteral("ABC"));
+    QCOMPARE(entry->attributes()->value("TestUnprotected"), QStringLiteral("DEF"));
 
     QVERIFY(db->metadata()->protectPassword());
     QVERIFY(entry->attributes()->isProtected("TestProtected"));
@@ -163,7 +163,7 @@ void TestKdbx3::testBrokenHeaderHash()
     // The protected stream key has been modified in the header.
     // Make sure the database won't open.
 
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/BrokenHeaderHash.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/BrokenHeaderHash.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create(""));
     auto db = QSharedPointer<Database>::create();

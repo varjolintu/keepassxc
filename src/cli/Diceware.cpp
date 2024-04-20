@@ -37,7 +37,7 @@ const QCommandLineOption Diceware::WordListOption =
 
 Diceware::Diceware()
 {
-    name = QString("diceware");
+    name = QStringLiteral("diceware");
     description = QObject::tr("Generate a new random diceware passphrase.");
     options.append(Diceware::WordCountOption);
     options.append(Diceware::WordListOption);

@@ -21,7 +21,7 @@
 
 Open::Open()
 {
-    name = QString("open");
+    name = QStringLiteral("open");
     description = QObject::tr("Open a database.");
 }
 

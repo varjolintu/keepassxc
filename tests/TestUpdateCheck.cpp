@@ -31,31 +31,31 @@ void TestUpdateCheck::initTestCase()
 void TestUpdateCheck::testCompareVersion()
 {
     // No upgrade
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0"), QString("2.3.0")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0"), QStringLiteral("2.3.0")), false);
 
     // First digit upgrade
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.4.0"), QString("3.0.0")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("3.0.0"), QString("2.4.0")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.4.0"), QStringLiteral("3.0.0")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("3.0.0"), QStringLiteral("2.4.0")), false);
 
     // Second digit upgrade
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.4"), QString("2.4.0")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.4.0"), QString("2.3.4")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.4"), QStringLiteral("2.4.0")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.4.0"), QStringLiteral("2.3.4")), false);
 
     // Third digit upgrade
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0"), QString("2.3.1")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.1"), QString("2.3.0")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0"), QStringLiteral("2.3.1")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.1"), QStringLiteral("2.3.0")), false);
 
     // Beta builds
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0"), QString("2.3.0-beta1")), false);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0"), QString("2.3.1-beta1")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0-beta1"), QString("2.3.0")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0-beta"), QString("2.3.0-beta1")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0-beta1"), QString("2.3.0-beta")), false);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0-beta1"), QString("2.3.0-beta2")), true);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.0-beta2"), QString("2.3.0-beta1")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0"), QStringLiteral("2.3.0-beta1")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0"), QStringLiteral("2.3.1-beta1")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0-beta1"), QStringLiteral("2.3.0")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0-beta"), QStringLiteral("2.3.0-beta1")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0-beta1"), QStringLiteral("2.3.0-beta")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0-beta1"), QStringLiteral("2.3.0-beta2")), true);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.0-beta2"), QStringLiteral("2.3.0-beta1")), false);
 
     // Snapshot and invalid data
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.3.4-snapshot"), QString("2.4.0")), false);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.4.0"), QString("invalid")), false);
-    QCOMPARE(UpdateChecker::compareVersions(QString("2.4.0"), QString("")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.3.4-snapshot"), QStringLiteral("2.4.0")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.4.0"), QStringLiteral("invalid")), false);
+    QCOMPARE(UpdateChecker::compareVersions(QStringLiteral("2.4.0"), QString()), false);
 }

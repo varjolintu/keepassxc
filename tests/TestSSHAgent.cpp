@@ -72,7 +72,7 @@ void TestSSHAgent::initTestCase()
     qDebug() << "ssh-agent initialized in" << timer.elapsed() << "ms";
 
     // initialize test key
-    const QString keyString = QString("-----BEGIN OPENSSH PRIVATE KEY-----\n"
+    const QString keyString = QStringLiteral("-----BEGIN OPENSSH PRIVATE KEY-----\n"
                                       "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW\n"
                                       "QyNTUxOQAAACDdlO5F2kF2WzedrBAHBi9wBHeISzXZ0IuIqrp0EzeazAAAAKjgCfj94An4\n"
                                       "/QAAAAtzc2gtZWQyNTUxOQAAACDdlO5F2kF2WzedrBAHBi9wBHeISzXZ0IuIqrp0EzeazA\n"
@@ -217,7 +217,7 @@ void TestSSHAgent::testToOpenSSHKey()
 {
     KeeAgentSettings settings;
     settings.setSelectedType("file");
-    settings.setFileName(QString("%1/id_rsa-encrypted-asn1").arg(QString(KEEPASSX_TEST_DATA_DIR)));
+    settings.setFileName(QStringLiteral("%1/id_rsa-encrypted-asn1").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR)));
 
     OpenSSHKey key;
     settings.toOpenSSHKey("username", "correctpassphrase", QString(), nullptr, key, false);

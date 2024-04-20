@@ -28,9 +28,9 @@
 TagModel::TagModel(QObject* parent)
     : QAbstractListModel(parent)
 {
-    m_defaultSearches << qMakePair(tr("Clear Search"), QString("")) << qMakePair(tr("All Entries"), QString("*"))
-                      << qMakePair(tr("Expired"), QString("is:expired"))
-                      << qMakePair(tr("Weak Passwords"), QString("is:weak"));
+    m_defaultSearches << qMakePair(tr("Clear Search"), QString()) << qMakePair(tr("All Entries"), QStringLiteral("*"))
+                      << qMakePair(tr("Expired"), QStringLiteral("is:expired"))
+                      << qMakePair(tr("Weak Passwords"), QStringLiteral("is:weak"));
 }
 
 TagModel::~TagModel() = default;
@@ -69,7 +69,7 @@ void TagModel::updateTagList()
     for (auto tag : m_db->tagList()) {
         auto escapedTag = tag;
         escapedTag.replace("\"", "\\\"");
-        m_tagList << qMakePair(tag, QString("tag:\"%1\"").arg(escapedTag));
+        m_tagList << qMakePair(tag, QStringLiteral("tag:\"%1\"").arg(escapedTag));
     }
 
     endResetModel();

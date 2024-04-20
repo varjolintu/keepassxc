@@ -124,7 +124,7 @@ void TestDatabase::testSaveAs()
     // Negative case when try to save not initialized DB.
     db->releaseData();
     QVERIFY2(!db->saveAs(newDbFileName, Database::Atomic, QString(), &error), error.toLatin1());
-    QCOMPARE(error, QString("Could not save, database has not been initialized!"));
+    QCOMPARE(error, QStringLiteral("Could not save, database has not been initialized!"));
 }
 
 void TestDatabase::testSignals()
@@ -168,7 +168,7 @@ void TestDatabase::testSignals()
 
 void TestDatabase::testEmptyRecycleBinOnDisabled()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinDisabled.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinDisabled.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("123"));
     auto db = QSharedPointer<Database>::create();
@@ -183,7 +183,7 @@ void TestDatabase::testEmptyRecycleBinOnDisabled()
 
 void TestDatabase::testEmptyRecycleBinOnNotCreated()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinNotYetCreated.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinNotYetCreated.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("123"));
     auto db = QSharedPointer<Database>::create();
@@ -198,7 +198,7 @@ void TestDatabase::testEmptyRecycleBinOnNotCreated()
 
 void TestDatabase::testEmptyRecycleBinOnEmpty()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinEmpty.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinEmpty.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("123"));
     auto db = QSharedPointer<Database>::create();
@@ -213,7 +213,7 @@ void TestDatabase::testEmptyRecycleBinOnEmpty()
 
 void TestDatabase::testEmptyRecycleBinWithHierarchicalData()
 {
-    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinWithData.kdbx");
+    QString filename = QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/RecycleBinWithData.kdbx");
     auto key = QSharedPointer<CompositeKey>::create();
     key->addKey(QSharedPointer<PasswordKey>::create("123"));
     auto db = QSharedPointer<Database>::create();
@@ -254,6 +254,6 @@ void TestDatabase::testCustomIcons()
     db.metadata()->addCustomIcon(uuid2, icon2, "Test", date);
     iconData = db.metadata()->customIcon(uuid2);
     QCOMPARE(iconData.data, icon2);
-    QCOMPARE(iconData.name, QString("Test"));
+    QCOMPARE(iconData.name, QStringLiteral("Test"));
     QCOMPARE(iconData.lastModified, date);
 }

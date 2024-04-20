@@ -39,8 +39,8 @@ OpenSSHKey::OpenSSHKey(QObject* parent)
     : QObject(parent)
     , m_check(0)
     , m_type(QString())
-    , m_cipherName(QString("none"))
-    , m_kdfName(QString("none"))
+    , m_cipherName(QStringLiteral("none"))
+    , m_kdfName(QStringLiteral("none"))
     , m_kdfOptions(QByteArray())
     , m_rawType(QString())
     , m_rawData(QByteArray())
@@ -137,17 +137,17 @@ const QString OpenSSHKey::privateKey()
     BinaryStream stream(&sshKey);
 
     // magic
-    stream.write(QString("openssh-key-v1").toUtf8());
+    stream.write(QStringLiteral("openssh-key-v1").toUtf8());
     stream.write(static_cast<quint8>(0));
 
     // cipher name
-    stream.writeString(QString("none"));
+    stream.writeString(QStringLiteral("none"));
 
     // kdf name
-    stream.writeString(QString("none"));
+    stream.writeString(QStringLiteral("none"));
 
     // kdf options
-    stream.writeString(QString(""));
+    stream.writeString(QString());
 
     // number of keys
     stream.write(static_cast<quint32>(1));

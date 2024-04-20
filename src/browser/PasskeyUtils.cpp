@@ -224,7 +224,7 @@ bool PasskeyUtils::isRegistrableDomainSuffix(const QString& hostSuffixString, co
         return false;
     }
 
-    const auto prefixedHostSuffix = QString(".%1").arg(hostSuffix);
+    const auto prefixedHostSuffix = QStringLiteral(".%1").arg(hostSuffix);
     if (!originalHost.endsWith(prefixedHostSuffix)) {
         return false;
     }
@@ -242,7 +242,7 @@ bool PasskeyUtils::isRegistrableDomainSuffix(const QString& hostSuffixString, co
         return false;
     }
 
-    if (!hostSuffix.endsWith(QString(".%1").arg(originalPublicSuffix))) {
+    if (!hostSuffix.endsWith(QStringLiteral(".%1").arg(originalPublicSuffix))) {
         return false;
     }
 
@@ -329,7 +329,7 @@ QJsonObject PasskeyUtils::buildClientDataJson(const QJsonObject& publicKey, cons
     clientData["challenge"] = publicKey["challenge"];
     clientData["crossOrigin"] = false;
     clientData["origin"] = origin;
-    clientData["type"] = get ? QString("webauthn.get") : QString("webauthn.create");
+    clientData["type"] = get ? QStringLiteral("webauthn.get") : QStringLiteral("webauthn.create");
 
     return clientData;
 }

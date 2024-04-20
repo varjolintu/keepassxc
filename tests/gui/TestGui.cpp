@@ -277,12 +277,12 @@ void TestGui::testCreateDatabase()
         auto* fileEdit = keyFileWidget->findChild<QLineEdit*>("keyFileLineEdit");
         QTRY_VERIFY(fileEdit);
         QTRY_VERIFY(fileEdit->isVisible());
-        fileDialog()->setNextFileName(QString("%1/%2").arg(QString(KEEPASSX_TEST_DATA_DIR), "FileKeyHashed.key"));
+        fileDialog()->setNextFileName(QStringLiteral("%1/%2").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), "FileKeyHashed.key"));
         QTest::keyClick(keyFileWidget->findChild<QPushButton*>("addButton"), Qt::Key::Key_Enter);
         QVERIFY(fileEdit->hasFocus());
         auto* browseButton = keyFileWidget->findChild<QPushButton*>("browseKeyFileButton");
         QTest::keyClick(browseButton, Qt::Key::Key_Enter);
-        QCOMPARE(fileEdit->text(), QString("%1/%2").arg(QString(KEEPASSX_TEST_DATA_DIR), "FileKeyHashed.key"));
+        QCOMPARE(fileEdit->text(), QStringLiteral("%1/%2").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), "FileKeyHashed.key"));
 
         // save database to temporary file
         TemporaryFile tmpFile;
@@ -307,8 +307,8 @@ void TestGui::testCreateDatabase()
     QCOMPARE(m_db->rootGroup()->children().size(), 0);
 
     // check meta data
-    QCOMPARE(m_db->metadata()->name(), QString("Test Name"));
-    QCOMPARE(m_db->metadata()->description(), QString("Test Description"));
+    QCOMPARE(m_db->metadata()->name(), QStringLiteral("Test Name"));
+    QCOMPARE(m_db->metadata()->description(), QStringLiteral("Test Description"));
 
     // check key and encryption
     QCOMPARE(m_db->key()->keys().size(), 2);
@@ -318,7 +318,7 @@ void TestGui::testCreateDatabase()
     auto compositeKey = QSharedPointer<CompositeKey>::create();
     compositeKey->addKey(QSharedPointer<PasswordKey>::create("test"));
     auto fileKey = QSharedPointer<FileKey>::create();
-    fileKey->load(QString("%1/%2").arg(QString(KEEPASSX_TEST_DATA_DIR), "FileKeyHashed.key"));
+    fileKey->load(QStringLiteral("%1/%2").arg(QStringLiteral(KEEPASSX_TEST_DATA_DIR), "FileKeyHashed.key"));
     compositeKey->addKey(fileKey);
     QCOMPARE(m_db->key()->rawKey(), compositeKey->rawKey());
 
@@ -346,10 +346,10 @@ void TestGui::testMergeDatabase()
     QApplication::processEvents();
 
     // set file to merge from
-    fileDialog()->setNextFileName(QString(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx"));
+    fileDialog()->setNextFileName(QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx"));
     triggerAction("actionDatabaseMerge");
 
-    QTRY_COMPARE(QApplication::focusWidget()->objectName(), QString("passwordEdit"));
+    QTRY_COMPARE(QApplication::focusWidget()->objectName(), QStringLiteral("passwordEdit"));
     auto* editPasswordMerge = QApplication::focusWidget();
     QVERIFY(editPasswordMerge->isVisible());
 
@@ -376,7 +376,7 @@ void TestGui::testAutoreloadDatabase()
     // Test accepting new file in autoreload
     MessageBox::setNextAnswer(MessageBox::Yes);
     // Overwrite the current database with the temp data
-    QVERIFY(m_dbFile.copyFromFile(QString(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx")));
+    QVERIFY(m_dbFile.copyFromFile(QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx")));
 
     QTRY_VERIFY(m_db != m_dbWidget->database());
     m_db = m_dbWidget->database();
@@ -394,7 +394,7 @@ void TestGui::testAutoreloadDatabase()
     // Test rejecting new file in autoreload
     MessageBox::setNextAnswer(MessageBox::No);
     // Overwrite the current database with the temp data
-    QVERIFY(m_dbFile.copyFromFile(QString(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx")));
+    QVERIFY(m_dbFile.copyFromFile(QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx")));
 
     // Ensure the merge did not take place
     QCOMPARE(m_db->rootGroup()->findChildByName("General")->entries().size(), 0);
@@ -413,7 +413,7 @@ void TestGui::testAutoreloadDatabase()
     // This is saying yes to merging the entries
     MessageBox::setNextAnswer(MessageBox::Merge);
     // Overwrite the current database with the temp data
-    QVERIFY(m_dbFile.copyFromFile(QString(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx")));
+    QVERIFY(m_dbFile.copyFromFile(QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/MergeDatabase.kdbx")));
 
     QTRY_VERIFY(m_db != m_dbWidget->database());
     m_db = m_dbWidget->database();
@@ -469,7 +469,7 @@ void TestGui::testEditEntry()
     QTRY_VERIFY(applyButton->isEnabled());
     QTest::mouseClick(applyButton, Qt::LeftButton);
     QCOMPARE(m_dbWidget->currentMode(), DatabaseWidget::Mode::EditMode);
-    QCOMPARE(entry->title(), QString("Sample Entry_test"));
+    QCOMPARE(entry->title(), QStringLiteral("Sample Entry_test"));
     QCOMPARE(entry->historyItems().size(), ++editCount);
     QVERIFY(!applyButton->isEnabled());
 
@@ -487,19 +487,19 @@ void TestGui::testEditEntry()
     auto* tags = editEntryWidget->findChild<TagsEdit*>("tagsList");
     QTest::keyClicks(tags, "_tag1");
     QTest::keyClick(tags, Qt::Key_Return);
-    QCOMPARE(tags->tags().last(), QString("_tag1"));
+    QCOMPARE(tags->tags().last(), QStringLiteral("_tag1"));
     QTest::keyClicks(tags, "tag 2"); // adds another tag
     QTest::keyClick(tags, Qt::Key_Return);
-    QCOMPARE(tags->tags().last(), QString("tag 2"));
+    QCOMPARE(tags->tags().last(), QStringLiteral("tag 2"));
     QTest::keyClick(tags, Qt::Key_Backspace); // Back into editing last tag
     QTest::keyClicks(tags, "_is!awesome");
     QTest::keyClick(tags, Qt::Key_Return);
-    QCOMPARE(tags->tags().last(), QString("tag 2_is!awesome"));
+    QCOMPARE(tags->tags().last(), QStringLiteral("tag 2_is!awesome"));
 
     // Test entry colors (simulate choosing a color)
     editEntryWidget->setCurrentPage(1);
-    auto fgColor = QString("#FF0000");
-    auto bgColor = QString("#0000FF");
+    auto fgColor = QStringLiteral("#FF0000");
+    auto bgColor = QStringLiteral("#0000FF");
     // Set foreground color
     auto colorButton = editEntryWidget->findChild<QPushButton*>("fgColorButton");
     auto colorCheckBox = editEntryWidget->findChild<QCheckBox*>("fgColorCheckBox");
@@ -532,7 +532,7 @@ void TestGui::testEditEntry()
 
     // Confirm edit was made
     QCOMPARE(m_dbWidget->currentMode(), DatabaseWidget::Mode::ViewMode);
-    QCOMPARE(entry->title(), QString("Sample Entry_test"));
+    QCOMPARE(entry->title(), QStringLiteral("Sample Entry_test"));
     QCOMPARE(entry->foregroundColor().toUpper(), fgColor.toUpper());
     QCOMPARE(entryItem.data(Qt::ForegroundRole), QVariant(fgColor));
     QCOMPARE(entry->backgroundColor().toUpper(), bgColor.toUpper());
@@ -540,7 +540,7 @@ void TestGui::testEditEntry()
     QCOMPARE(entry->historyItems().size(), ++editCount);
 
     // Confirm modified indicator is showing
-    QTRY_COMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QString("%1*").arg(m_dbFileName));
+    QTRY_COMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QStringLiteral("%1*").arg(m_dbFileName));
 
     // Test copy & paste newline sanitization
     QTest::mouseClick(entryEditWidget, Qt::LeftButton);
@@ -553,11 +553,11 @@ void TestGui::testEditEntry()
     editEntryWidget->findChild<QLineEdit*>("urlEdit")->setText("multiline\nurl");
     QTest::mouseClick(okButton, Qt::LeftButton);
 
-    QCOMPARE(entry->title(), QString("multiline title"));
-    QCOMPARE(entry->username(), QString("multiline username"));
+    QCOMPARE(entry->title(), QStringLiteral("multiline title"));
+    QCOMPARE(entry->username(), QStringLiteral("multiline username"));
     // here we keep newlines, so users can't lock themselves out accidentally
-    QCOMPARE(entry->password(), QString("multiline\npassword"));
-    QCOMPARE(entry->url(), QString("multiline url"));
+    QCOMPARE(entry->password(), QStringLiteral("multiline\npassword"));
+    QCOMPARE(entry->url(), QStringLiteral("multiline url"));
 }
 
 void TestGui::testSearchEditEntry()
@@ -587,13 +587,13 @@ void TestGui::testSearchEditEntry()
     auto* editEntryWidgetButtonBox = editEntryWidget->findChild<QDialogButtonBox*>("buttonBox");
 
     // Create "Doggy" in "Good"
-    Group* goodGroup = m_dbWidget->currentGroup()->findChildByName(QString("Good"));
+    Group* goodGroup = m_dbWidget->currentGroup()->findChildByName(QStringLiteral("Good"));
     m_dbWidget->groupView()->setCurrentGroup(goodGroup);
     QTest::mouseClick(entryNewWidget, Qt::LeftButton);
     QTest::keyClicks(titleEdit, "Doggy");
     QTest::mouseClick(editEntryWidgetButtonBox->button(QDialogButtonBox::Ok), Qt::LeftButton);
     // Select "Bad" group in groupView
-    Group* badGroup = m_db->rootGroup()->findChildByName(QString("Bad"));
+    Group* badGroup = m_db->rootGroup()->findChildByName(QStringLiteral("Bad"));
     m_dbWidget->groupView()->setCurrentGroup(badGroup);
 
     // Search for "Doggy" entry
@@ -648,8 +648,8 @@ void TestGui::testAddEntry()
     QModelIndex item = entryView->model()->index(1, 1);
     Entry* entry = entryView->entryFromIndex(item);
 
-    QCOMPARE(entry->title(), QString("test"));
-    QCOMPARE(entry->username(), QString("AutocompletionUsername"));
+    QCOMPARE(entry->title(), QStringLiteral("test"));
+    QCOMPARE(entry->username(), QStringLiteral("AutocompletionUsername"));
     QCOMPARE(entry->historyItems().size(), 0);
 
     m_db->updateCommonUsernames();
@@ -672,8 +672,8 @@ void TestGui::testAddEntry()
     item = entryView->model()->index(1, 1);
     entry = entryView->entryFromIndex(item);
 
-    QCOMPARE(entry->title(), QString("something 2"));
-    QCOMPARE(entry->username(), QString("AutocompletionUsername"));
+    QCOMPARE(entry->title(), QStringLiteral("something 2"));
+    QCOMPARE(entry->username(), QStringLiteral("AutocompletionUsername"));
     QCOMPARE(entry->historyItems().size(), 0);
 
     // Add entry "something 5" but click cancel button (does NOT add entry)
@@ -870,8 +870,8 @@ void TestGui::testDicewareEntryEntropy()
         auto* strengthLabel = pwGeneratorWidget->findChild<QLabel*>("strengthLabel");
         auto* wordLengthLabel = pwGeneratorWidget->findChild<QLabel*>("charactersInPassphraseLabel");
 
-        QTRY_COMPARE_WITH_TIMEOUT(entropyLabel->text(), QString("Entropy: 77.55 bit"), 200);
-        QCOMPARE(strengthLabel->text(), QString("Password Quality: Good"));
+        QTRY_COMPARE_WITH_TIMEOUT(entropyLabel->text(), QStringLiteral("Entropy: 77.55 bit"), 200);
+        QCOMPARE(strengthLabel->text(), QStringLiteral("Password Quality: Good"));
         QCOMPARE(wordLengthLabel->text().toInt(), pwGeneratorWidget->getGeneratedPassword().size());
 
         QTest::mouseClick(generatedPassword, Qt::LeftButton);
@@ -987,7 +987,7 @@ void TestGui::testSearch()
 
     // Search for "ZZZ"
     QTest::keyClicks(searchTextEdit, "ZZZ");
-    QTRY_COMPARE(searchTextEdit->text(), QString("ZZZ"));
+    QTRY_COMPARE(searchTextEdit->text(), QStringLiteral("ZZZ"));
     QTRY_VERIFY(m_dbWidget->isSearchActive());
     QTRY_COMPARE(entryView->model()->rowCount(), 0);
     // Press the search clear button
@@ -1026,7 +1026,7 @@ void TestGui::testSearch()
     // Restore focus using F3 key and search text selection
     QTest::keyClick(m_mainWindow.data(), Qt::Key_F3);
     QTRY_VERIFY(searchTextEdit->hasFocus());
-    QTRY_COMPARE(searchTextEdit->selectedText(), QString("someTHING"));
+    QTRY_COMPARE(searchTextEdit->selectedText(), QStringLiteral("someTHING"));
 
     searchedEntry->setPassword("password");
     QClipboard* clipboard = QApplication::clipboard();
@@ -1054,7 +1054,7 @@ void TestGui::testSearch()
     // Test that password does not copy
     searchTextEdit->selectAll();
     QTest::keyClick(searchTextEdit, Qt::Key_C, Qt::ControlModifier);
-    QTRY_COMPARE(clipboard->text(), QString("someTHING"));
+    QTRY_COMPARE(clipboard->text(), QStringLiteral("someTHING"));
 
     // Test case sensitive search
     searchWidget->setCaseSensitive(true);
@@ -1068,7 +1068,7 @@ void TestGui::testSearch()
     QCOMPARE(groupView->currentGroup(), m_db->rootGroup());
     QModelIndex rootGroupIndex = groupView->model()->index(0, 0);
     clickIndex(groupView->model()->index(0, 0, rootGroupIndex), groupView, Qt::LeftButton);
-    QCOMPARE(groupView->currentGroup()->name(), QString("General"));
+    QCOMPARE(groupView->currentGroup()->name(), QStringLiteral("General"));
     // Selecting a group should cancel search
     QTRY_COMPARE(entryView->model()->rowCount(), 0);
     // Restore search
@@ -1244,7 +1244,7 @@ void TestGui::testCloneEntry()
     QCOMPARE(entryView->model()->rowCount(), 2);
     Entry* entryClone = entryView->entryFromIndex(entryView->model()->index(1, 1));
     QVERIFY(entryOrg->uuid() != entryClone->uuid());
-    QCOMPARE(entryClone->title(), entryOrg->title() + QString(" - Clone"));
+    QCOMPARE(entryClone->title(), entryOrg->title() + QStringLiteral(" - Clone"));
     QVERIFY(m_dbWidget->currentSelectedEntry()->uuid() == entryClone->uuid());
 }
 
@@ -1283,13 +1283,13 @@ void TestGui::testEntryPlaceholders()
     QModelIndex item = entryView->model()->index(1, 1);
     Entry* entry = entryView->entryFromIndex(item);
 
-    QCOMPARE(entry->title(), QString("test"));
-    QCOMPARE(entry->url(), QString("{TITLE}.{USERNAME}"));
+    QCOMPARE(entry->title(), QStringLiteral("test"));
+    QCOMPARE(entry->url(), QStringLiteral("{TITLE}.{USERNAME}"));
 
     // Test password copy
     QClipboard* clipboard = QApplication::clipboard();
     m_dbWidget->copyURL();
-    QTRY_COMPARE(clipboard->text(), QString("test.john"));
+    QTRY_COMPARE(clipboard->text(), QStringLiteral("test.john"));
 }
 
 void TestGui::testDragAndDropEntry()
@@ -1328,9 +1328,9 @@ void TestGui::testDragAndDropEntry()
     mimeData.setData("application/x-keepassx-entry", encoded);
 
     // Test Move, entry pointer should remain the same
-    QCOMPARE(entry->group()->name(), QString("NewDatabase"));
+    QCOMPARE(entry->group()->name(), QStringLiteral("NewDatabase"));
     QVERIFY(groupModel->dropMimeData(&mimeData, Qt::MoveAction, -1, 0, targetIndex));
-    QCOMPARE(entry->group()->name(), QString("General"));
+    QCOMPARE(entry->group()->name(), QStringLiteral("General"));
     QCOMPARE(entry->uuid(), uuid);
     QCOMPARE(entry->historyItems().count(), history);
 }
@@ -1372,7 +1372,7 @@ void TestGui::testSaveAs()
 
     triggerAction("actionDatabaseSaveAs");
 
-    QCOMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QString("testSaveAs"));
+    QCOMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QStringLiteral("testSaveAs"));
 
     checkDatabase(tmpFileName);
 
@@ -1395,13 +1395,13 @@ void TestGui::testSaveBackup()
     tmpFile.remove();
 
     // wait for modified timer
-    QTRY_COMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QString("testSaveBackup*"));
+    QTRY_COMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QStringLiteral("testSaveBackup*"));
 
     fileDialog()->setNextFileName(tmpFileName);
 
     triggerAction("actionDatabaseSaveBackup");
 
-    QTRY_COMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QString("testSaveBackup*"));
+    QTRY_COMPARE(m_tabWidget->tabText(m_tabWidget->currentIndex()), QStringLiteral("testSaveBackup*"));
 
     checkDatabase(tmpFileName);
 
@@ -1437,7 +1437,7 @@ void TestGui::testSaveBackupPath_data()
     QTest::newRow("Path with placeholders") << "{DB_FILENAME}.old.kdbx"
                                             << "KeePassXC.old.kdbx";
     // empty path should be replaced with default pattern
-    QTest::newRow("Empty path") << QString("") << config()->getDefault(Config::BackupFilePathPattern).toString();
+    QTest::newRow("Empty path") << QString() << config()->getDefault(Config::BackupFilePathPattern).toString();
     // {DB_FILENAME} should be replaced with database filename
     QTest::newRow("") << "{DB_FILENAME}_.old.kdbx"
                       << "{DB_FILENAME}_.old.kdbx";
@@ -1675,8 +1675,8 @@ void TestGui::testDragAndDropKdbxFiles()
 {
     const int openedDatabasesCount = m_tabWidget->count();
 
-    const QString badDatabaseFilePath(QString(KEEPASSX_TEST_DATA_DIR).append("/NotDatabase.notkdbx"));
-    const QString goodDatabaseFilePath(QString(KEEPASSX_TEST_DATA_DIR).append("/NewDatabase.kdbx"));
+    const QString badDatabaseFilePath(QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/NotDatabase.notkdbx"));
+    const QString goodDatabaseFilePath(QStringLiteral(KEEPASSX_TEST_DATA_DIR).append("/NewDatabase.kdbx"));
 
     QMimeData badMimeData;
     badMimeData.setUrls({QUrl::fromLocalFile(badDatabaseFilePath)});
@@ -1737,63 +1737,63 @@ void TestGui::testSortGroups()
 
     triggerAction("actionGroupSortAsc");
     QList<Group*> children = rootGroup->children();
-    QCOMPARE(children[0]->name(), QString("eMail"));
-    QCOMPARE(children[1]->name(), QString("General"));
-    QCOMPARE(children[2]->name(), QString("Homebanking"));
-    QCOMPARE(children[3]->name(), QString("Internet"));
-    QCOMPARE(children[4]->name(), QString("Network"));
-    QCOMPARE(children[5]->name(), QString("Windows"));
+    QCOMPARE(children[0]->name(), QStringLiteral("eMail"));
+    QCOMPARE(children[1]->name(), QStringLiteral("General"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Homebanking"));
+    QCOMPARE(children[3]->name(), QStringLiteral("Internet"));
+    QCOMPARE(children[4]->name(), QStringLiteral("Network"));
+    QCOMPARE(children[5]->name(), QStringLiteral("Windows"));
     QList<Group*> subChildren = internetGroup->children();
-    QCOMPARE(subChildren[0]->name(), QString("Amazon"));
-    QCOMPARE(subChildren[1]->name(), QString("eBay"));
-    QCOMPARE(subChildren[2]->name(), QString("Facebook"));
-    QCOMPARE(subChildren[3]->name(), QString("Google"));
+    QCOMPARE(subChildren[0]->name(), QStringLiteral("Amazon"));
+    QCOMPARE(subChildren[1]->name(), QStringLiteral("eBay"));
+    QCOMPARE(subChildren[2]->name(), QStringLiteral("Facebook"));
+    QCOMPARE(subChildren[3]->name(), QStringLiteral("Google"));
 
     triggerAction("actionGroupSortDesc");
     children = rootGroup->children();
-    QCOMPARE(children[0]->name(), QString("Windows"));
-    QCOMPARE(children[1]->name(), QString("Network"));
-    QCOMPARE(children[2]->name(), QString("Internet"));
-    QCOMPARE(children[3]->name(), QString("Homebanking"));
-    QCOMPARE(children[4]->name(), QString("General"));
-    QCOMPARE(children[5]->name(), QString("eMail"));
+    QCOMPARE(children[0]->name(), QStringLiteral("Windows"));
+    QCOMPARE(children[1]->name(), QStringLiteral("Network"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Internet"));
+    QCOMPARE(children[3]->name(), QStringLiteral("Homebanking"));
+    QCOMPARE(children[4]->name(), QStringLiteral("General"));
+    QCOMPARE(children[5]->name(), QStringLiteral("eMail"));
     subChildren = internetGroup->children();
-    QCOMPARE(subChildren[0]->name(), QString("Google"));
-    QCOMPARE(subChildren[1]->name(), QString("Facebook"));
-    QCOMPARE(subChildren[2]->name(), QString("eBay"));
-    QCOMPARE(subChildren[3]->name(), QString("Amazon"));
+    QCOMPARE(subChildren[0]->name(), QStringLiteral("Google"));
+    QCOMPARE(subChildren[1]->name(), QStringLiteral("Facebook"));
+    QCOMPARE(subChildren[2]->name(), QStringLiteral("eBay"));
+    QCOMPARE(subChildren[3]->name(), QStringLiteral("Amazon"));
 
     m_dbWidget->groupView()->setCurrentGroup(internetGroup);
     triggerAction("actionGroupSortAsc");
     children = rootGroup->children();
-    QCOMPARE(children[0]->name(), QString("Windows"));
-    QCOMPARE(children[1]->name(), QString("Network"));
-    QCOMPARE(children[2]->name(), QString("Internet"));
-    QCOMPARE(children[3]->name(), QString("Homebanking"));
-    QCOMPARE(children[4]->name(), QString("General"));
-    QCOMPARE(children[5]->name(), QString("eMail"));
+    QCOMPARE(children[0]->name(), QStringLiteral("Windows"));
+    QCOMPARE(children[1]->name(), QStringLiteral("Network"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Internet"));
+    QCOMPARE(children[3]->name(), QStringLiteral("Homebanking"));
+    QCOMPARE(children[4]->name(), QStringLiteral("General"));
+    QCOMPARE(children[5]->name(), QStringLiteral("eMail"));
     subChildren = internetGroup->children();
-    QCOMPARE(subChildren[0]->name(), QString("Amazon"));
-    QCOMPARE(subChildren[1]->name(), QString("eBay"));
-    QCOMPARE(subChildren[2]->name(), QString("Facebook"));
-    QCOMPARE(subChildren[3]->name(), QString("Google"));
+    QCOMPARE(subChildren[0]->name(), QStringLiteral("Amazon"));
+    QCOMPARE(subChildren[1]->name(), QStringLiteral("eBay"));
+    QCOMPARE(subChildren[2]->name(), QStringLiteral("Facebook"));
+    QCOMPARE(subChildren[3]->name(), QStringLiteral("Google"));
 
     m_dbWidget->groupView()->setCurrentGroup(rootGroup);
     triggerAction("actionGroupSortAsc");
     m_dbWidget->groupView()->setCurrentGroup(internetGroup);
     triggerAction("actionGroupSortDesc");
     children = rootGroup->children();
-    QCOMPARE(children[0]->name(), QString("eMail"));
-    QCOMPARE(children[1]->name(), QString("General"));
-    QCOMPARE(children[2]->name(), QString("Homebanking"));
-    QCOMPARE(children[3]->name(), QString("Internet"));
-    QCOMPARE(children[4]->name(), QString("Network"));
-    QCOMPARE(children[5]->name(), QString("Windows"));
+    QCOMPARE(children[0]->name(), QStringLiteral("eMail"));
+    QCOMPARE(children[1]->name(), QStringLiteral("General"));
+    QCOMPARE(children[2]->name(), QStringLiteral("Homebanking"));
+    QCOMPARE(children[3]->name(), QStringLiteral("Internet"));
+    QCOMPARE(children[4]->name(), QStringLiteral("Network"));
+    QCOMPARE(children[5]->name(), QStringLiteral("Windows"));
     subChildren = internetGroup->children();
-    QCOMPARE(subChildren[0]->name(), QString("Google"));
-    QCOMPARE(subChildren[1]->name(), QString("Facebook"));
-    QCOMPARE(subChildren[2]->name(), QString("eBay"));
-    QCOMPARE(subChildren[3]->name(), QString("Amazon"));
+    QCOMPARE(subChildren[0]->name(), QStringLiteral("Google"));
+    QCOMPARE(subChildren[1]->name(), QStringLiteral("Facebook"));
+    QCOMPARE(subChildren[2]->name(), QStringLiteral("eBay"));
+    QCOMPARE(subChildren[3]->name(), QStringLiteral("Amazon"));
 }
 
 void TestGui::testTrayRestoreHide()
@@ -2100,7 +2100,7 @@ void TestGui::checkStatusBarText(const QString& textFragment)
     QApplication::processEvents();
     QVERIFY(m_statusBarLabel->isVisible());
     QTRY_VERIFY2(m_statusBarLabel->text().startsWith(textFragment),
-                 qPrintable(QString("'%1' doesn't start with '%2'").arg(m_statusBarLabel->text(), textFragment)));
+                 qPrintable(QStringLiteral("'%1' doesn't start with '%2'").arg(m_statusBarLabel->text(), textFragment)));
 }
 
 void TestGui::triggerAction(const QString& name)
