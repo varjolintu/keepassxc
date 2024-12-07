@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,13 +70,14 @@ QJsonObject BrowserMessageBuilder::buildMessage(const QString& nonce) const
 
 QJsonObject BrowserMessageBuilder::buildResponse(const QString& action,
                                                  const QString& nonce,
-                                                 const Parameters& params,
+                                                 const QString& requestId,
+                                                 const ResponseParameters& params,
                                                  const QString& publicKey,
                                                  const QString& secretKey)
 {
-    auto message = buildMessage(nonce);
+    QJsonObject message;
 
-    Parameters::const_iterator i;
+    ResponseParameters::const_iterator i;
     for (i = params.constBegin(); i != params.constEnd(); ++i) {
         message[i.key()] = QJsonValue::fromVariant(i.value());
     }
@@ -90,6 +91,7 @@ QJsonObject BrowserMessageBuilder::buildResponse(const QString& action,
     response["action"] = action;
     response["message"] = encryptedMessage;
     response["nonce"] = nonce;
+    response["requestID"] = requestId;
     return response;
 }
 

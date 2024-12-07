@@ -24,7 +24,7 @@
 
 class QJsonObject;
 
-typedef QMap<QString, QVariant> Parameters;
+typedef QMap<QString, QVariant> ResponseParameters;
 
 namespace
 {
@@ -76,7 +76,8 @@ public:
     QJsonObject buildMessage(const QString& nonce) const;
     QJsonObject buildResponse(const QString& action,
                               const QString& nonce,
-                              const Parameters& params,
+                              const QString& requestId,
+                              const ResponseParameters& params,
                               const QString& publicKey,
                               const QString& secretKey);
     QJsonObject getErrorReply(const QString& action, const int errorCode) const;

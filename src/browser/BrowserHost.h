@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public:
     void sendClientMessage(QLocalSocket* socket, const QJsonObject& json);
 
 signals:
-    void clientMessageReceived(QLocalSocket* socket, const QJsonObject& json);
+    void clientMessageReceived(const QJsonObject& json, QLocalSocket* socket);
 
 private slots:
     void proxyConnected();

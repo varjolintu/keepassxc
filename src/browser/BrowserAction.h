@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ class QLocalSocket;
 
 struct BrowserRequest
 {
+    QString action;
+    QString requestId;
     QString hash;
     QString nonce;
     QString incrementedNonce;
@@ -66,39 +68,40 @@ public:
     explicit BrowserAction() = default;
     ~BrowserAction() = default;
 
-    QJsonObject processClientMessage(QLocalSocket* socket, const QJsonObject& json);
+    QJsonObject processClientMessage(const QJsonObject& message, QLocalSocket* socket);
 
 private:
-    QJsonObject handleAction(QLocalSocket* socket, const QJsonObject& json);
-    QJsonObject handleChangePublicKeys(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetDatabaseHash(const QJsonObject& json, const QString& action);
-    QJsonObject handleAssociate(const QJsonObject& json, const QString& action);
-    QJsonObject handleTestAssociate(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetLogins(const QJsonObject& json, const QString& action);
-    QJsonObject handleGeneratePassword(QLocalSocket* socket, const QJsonObject& json, const QString& action);
-    QJsonObject handleSetLogin(const QJsonObject& json, const QString& action);
-    QJsonObject handleLockDatabase(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetDatabaseGroups(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetDatabaseEntries(const QJsonObject& json, const QString& action);
-    QJsonObject handleCreateNewGroup(const QJsonObject& json, const QString& action);
-    QJsonObject handleGetTotp(const QJsonObject& json, const QString& action);
-    QJsonObject handleDeleteEntry(const QJsonObject& json, const QString& action);
-    QJsonObject handleGlobalAutoType(const QJsonObject& json, const QString& action);
-    QJsonObject handlePasskeysGet(const QJsonObject& json, const QString& action);
-    QJsonObject handlePasskeysRegister(const QJsonObject& json, const QString& action);
+    QJsonObject handleAction(const QJsonObject& message, QLocalSocket* socket);
+    QJsonObject handleAssociate(const BrowserRequest& browserRequest);
+    QJsonObject handleChangePublicKeys(const QJsonObject& message);
+    QJsonObject handleCreateCredentials(const BrowserRequest& browserRequest);
+    QJsonObject handleCreateNewGroup(const BrowserRequest& browserRequest);
+    QJsonObject handleGetDatabaseStatuses(const BrowserRequest& browserRequest);
+    QJsonObject handleDeleteEntry(const BrowserRequest& browserRequest);
+    QJsonObject handleGeneratePassword(const BrowserRequest& browserRequest, QLocalSocket* socket);
+    QJsonObject handleGetCredentials(const BrowserRequest& browserRequest);
+    QJsonObject handleGetDatabaseEntries(const BrowserRequest& browserRequest);
+    QJsonObject handleGetDatabaseGroups(const BrowserRequest& browserRequest);
+    QJsonObject handleGetTotp(const BrowserRequest& browserRequest);
+    QJsonObject handleGlobalAutoType(const BrowserRequest& browserRequest);
+    QJsonObject handleLockDatabase(const BrowserRequest& browserRequest);
+    QJsonObject handlePasskeysGet(const BrowserRequest& browserRequest);
+    QJsonObject handlePasskeysRegister(const BrowserRequest& browserRequest);
 
-    QJsonObject buildResponse(const QString& action, const QString& nonce, const Parameters& params = {});
+private:
+    QJsonObject buildResponse(const BrowserRequest& browserRequest, const ResponseParameters& params = {}) const;
+    QJsonObject buildErrorResponse(const BrowserRequest& browserRequest, const int errorCode) const;
     QJsonObject getErrorReply(const QString& action, const int errorCode) const;
-    QJsonObject decryptMessage(const QString& message, const QString& nonce);
-    BrowserRequest decodeRequest(const QJsonObject& json);
-    StringPairList getConnectionKeys(const BrowserRequest& browserRequest);
+    QJsonObject decryptMessage(const QString& message, const QString& nonce) const;
+    BrowserRequest decodeRequest(const QJsonObject& message) const;
+    StringPairList getConnectionKeys(const BrowserRequest& browserRequest) const;
+    bool isDatabaseConnected(const BrowserRequest& browserRequest) const;
 
     static const int MaxUrlLength;
 
     QString m_clientPublicKey;
     QString m_publicKey;
     QString m_secretKey;
-    bool m_associated = false;
 
     friend class TestBrowser;
 };

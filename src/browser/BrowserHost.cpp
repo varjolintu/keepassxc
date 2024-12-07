@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ void BrowserHost::readProxyMessage()
         return;
     }
 
-    emit clientMessageReceived(socket, json.object());
+    emit clientMessageReceived(json.object(), socket);
 }
 
 void BrowserHost::broadcastClientMessage(const QJsonObject& json)

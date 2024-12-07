@@ -39,13 +39,14 @@ struct KeyPairMessage
 {
     QLocalSocket* socket;
     QString nonce;
+    QString requestId;
     QString publicKey;
     QString secretKey;
 };
 
 struct EntryParameters
 {
-    QString dbid;
+    //QString dbid;
     QString title;
     QString login;
     QString password;
@@ -72,16 +73,18 @@ public:
 
     QString getKey(const QString& id);
     QString storeKey(const QString& key);
-    QString getDatabaseHash(bool legacy = false);
+    QString getDatabaseHash();
+    QJsonArray getDatabaseStatuses(const StringPairList& keyList);
 
     bool isDatabaseOpened() const;
     bool openDatabase(bool triggerUnlock);
-    void lockDatabase();
+    void lockDatabase(bool lockSingle);
+    bool isDatabaseConnected(const StringPairList& keyList, const QString& databaseHash);
 
     QJsonObject getDatabaseGroups();
     QJsonArray getDatabaseEntries();
     QJsonObject createNewGroup(const QString& groupName, bool isPasskeysGroup = false);
-    QString getCurrentTotp(const QString& uuid);
+    QJsonArray getTotp(const StringPairList& keyList, const QStringList& uuids);
     void showPasswordGenerator(const KeyPairMessage& keyPairMessage);
     bool isPasswordGeneratorRequested() const;
     QSharedPointer<Database> getDatabase(const QUuid& rootGroupUuid = {});
@@ -113,8 +116,7 @@ public:
                            const QString& privateKey);
 
     void addEntry(const EntryParameters& entryParameters,
-                  const QString& group,
-                  const QString& groupUuid,
+                  const QString& groupPath,
                   const bool downloadFavicon,
                   const QSharedPointer<Database>& selectedDb = {});
     bool updateEntry(const EntryParameters& entryParameters, const QString& uuid);
@@ -145,7 +147,7 @@ public slots:
     void activeDatabaseChanged(DatabaseWidget* dbWidget);
 
 private slots:
-    void processClientMessage(QLocalSocket* socket, const QJsonObject& message);
+    void processClientMessage(const QJsonObject& message, QLocalSocket* socket);
     void handleDatabaseUnlockDialogFinished(bool accepted, DatabaseWidget* dbWidget);
 
 private:
@@ -205,6 +207,8 @@ private:
     bool handleURLWithWildcards(const QUrl& entryQUrl, const QString& siteUrl);
     QString getDatabaseRootUuid();
     QString getDatabaseRecycleBinUuid();
+    QList<QSharedPointer<Database>> getConnectedDatabases(const StringPairList& keyList);
+    QString getDatabaseHash(const QString& rootGroupUuid);
     void hideWindow() const;
     void raiseWindow(const bool force = false);
     void updateWindowState();

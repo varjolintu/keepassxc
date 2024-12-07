@@ -59,15 +59,14 @@ void TestBrowser::init()
 
 void TestBrowser::testChangePublicKeys()
 {
-    QJsonObject json;
-    json["action"] = "change-public-keys";
-    json["publicKey"] = PUBLICKEY;
-    json["nonce"] = NONCE;
+    QJsonObject message;
+    message["action"] = "change-public-keys";
+    message["publicKey"] = PUBLICKEY;
+    message["nonce"] = NONCE;
 
-    auto response = m_browserAction->processClientMessage(nullptr, json);
+    auto response = m_browserAction->processClientMessage(message, nullptr);
     QCOMPARE(response["action"].toString(), QString("change-public-keys"));
     QCOMPARE(response["publicKey"].toString() == PUBLICKEY, false);
-    QCOMPARE(response["success"].toString(), TRUE_STR);
 }
 
 void TestBrowser::testEncryptMessage()
@@ -119,11 +118,11 @@ void TestBrowser::testBuildResponse()
     const auto val = QString("value1");
 
     // Note: Passing a const QJsonObject will fail
-    const Parameters params{
+    const ResponseParameters params{
         {"test-param-1", val}, {"test-param-2", 2}, {"test-param-3", false}, {"object", object}, {"arr", arr}};
 
     const auto action = QString("test-action");
-    const auto message = browserMessageBuilder()->buildResponse(action, NONCE, params, PUBLICKEY, SERVERSECRETKEY);
+    const auto message = browserMessageBuilder()->buildResponse(action, NONCE, "", params, PUBLICKEY, SERVERSECRETKEY);
     QVERIFY(!message.isEmpty());
     QCOMPARE(message["action"].toString(), action);
     QCOMPARE(message["nonce"].toString(), NONCE);

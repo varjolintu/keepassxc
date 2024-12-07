@@ -222,6 +222,8 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     connect(this, SIGNAL(currentChanged(int)), SLOT(emitCurrentModeChanged()));
     connect(this, SIGNAL(requestGlobalAutoType(const QString&)), parent, SLOT(performGlobalAutoType(const QString&)));
     connect(config(), &Config::changed, this, &DatabaseWidget::onConfigChanged);
+    connect(this, SIGNAL(lockAndSwitchToFirstUnlockedDatabase()), parent, SLOT(lockAndSwitchToFirstUnlockedDatabase()));
+    connect(this, SIGNAL(lockDatabases()), parent, SLOT(lockDatabases()));
     // clang-format on
 
     connectDatabaseSignals();
