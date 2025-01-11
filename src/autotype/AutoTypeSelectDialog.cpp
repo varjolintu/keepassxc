@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2021 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -300,7 +300,7 @@ void AutoTypeSelectDialog::buildActionMenu()
     m_actionMenu->addAction(copyPasswordAction);
     m_actionMenu->addAction(copyTotpAction);
 
-    typeUsernameAction->setShortcut(Qt::CTRL + Qt::Key_1);
+    typeUsernameAction->setShortcut(Qt::CTRL | Qt::Key_1);
     typeUsernameAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::USERNAME);
     connect(typeUsernameAction, &QAction::triggered, this, [&] {
         auto match = m_ui->view->currentMatch();
@@ -308,7 +308,7 @@ void AutoTypeSelectDialog::buildActionMenu()
         submitAutoTypeMatch(match);
     });
 
-    typePasswordAction->setShortcut(Qt::CTRL + Qt::Key_2);
+    typePasswordAction->setShortcut(Qt::CTRL | Qt::Key_2);
     typePasswordAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::PASSWORD);
     connect(typePasswordAction, &QAction::triggered, this, [&] {
         auto match = m_ui->view->currentMatch();
@@ -316,7 +316,7 @@ void AutoTypeSelectDialog::buildActionMenu()
         submitAutoTypeMatch(match);
     });
 
-    typeTotpAction->setShortcut(Qt::CTRL + Qt::Key_3);
+    typeTotpAction->setShortcut(Qt::CTRL | Qt::Key_3);
     typeTotpAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::TOTP);
     connect(typeTotpAction, &QAction::triggered, this, [&] {
         auto match = m_ui->view->currentMatch();
@@ -327,14 +327,14 @@ void AutoTypeSelectDialog::buildActionMenu()
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
     auto typeVirtualAction = new QAction(icons()->icon("auto-type"), tr("Use Virtual Keyboard"), nullptr);
     m_actionMenu->insertAction(copyUsernameAction, typeVirtualAction);
-    typeVirtualAction->setShortcut(Qt::CTRL + Qt::Key_4);
+    typeVirtualAction->setShortcut(Qt::CTRL | Qt::Key_4);
     connect(typeVirtualAction, &QAction::triggered, this, [&] {
         m_virtualMode = true;
         activateCurrentMatch();
     });
 #endif
 
-    copyUsernameAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_1);
+    copyUsernameAction->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_1);
     copyUsernameAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::USERNAME);
     connect(copyUsernameAction, &QAction::triggered, this, [&] {
         auto entry = m_ui->view->currentMatch().first;
@@ -344,7 +344,7 @@ void AutoTypeSelectDialog::buildActionMenu()
         }
     });
 
-    copyPasswordAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_2);
+    copyPasswordAction->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_2);
     copyPasswordAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::PASSWORD);
     connect(copyPasswordAction, &QAction::triggered, this, [&] {
         auto entry = m_ui->view->currentMatch().first;
@@ -354,7 +354,7 @@ void AutoTypeSelectDialog::buildActionMenu()
         }
     });
 
-    copyTotpAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_3);
+    copyTotpAction->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_3);
     copyTotpAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::TOTP);
     connect(copyTotpAction, &QAction::triggered, this, [&] {
         auto entry = m_ui->view->currentMatch().first;
