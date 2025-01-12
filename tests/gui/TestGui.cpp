@@ -679,8 +679,8 @@ void TestGui::testEditEntry()
 
     // Test entry colors (simulate choosing a color)
     editEntryWidget->switchToPage(EditEntryWidget::Page::Advanced);
-    //auto fgColor = QString("#FF0000");
-    //auto bgColor = QString("#0000FF");
+    // auto fgColor = QString("#FF0000");
+    // auto bgColor = QString("#0000FF");
     auto fgColor = QColor::fromString("#FF0000");
     auto bgColor = QColor::fromString("#0000FF");
     // Set foreground color

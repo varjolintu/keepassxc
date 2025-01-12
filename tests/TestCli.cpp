@@ -1895,7 +1895,7 @@ void TestCli::testRemove()
     setInput("a");
     execCmd(removeCmd, {"rm", m_dbFile->fileName(), "/Sample Entry"});
     m_stderr->readLine(); // skip password prompt
-    //QCOMPARE(m_stderr->readAll(), QByteArray());
+    // QCOMPARE(m_stderr->readAll(), QByteArray());
     QCOMPARE(m_stdout->readAll(), QByteArray("Successfully recycled entry Sample Entry.\n"));
 
     auto readBackDb = readDatabase();

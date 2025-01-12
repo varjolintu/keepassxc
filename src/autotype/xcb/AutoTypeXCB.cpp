@@ -22,10 +22,10 @@
 #include "gui/osutils/nixutils/X11Funcs.h"
 
 #include <QGuiApplication>
-#include <private/qtx11extras_p.h>
 #include <X11/XKBlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h>
+#include <private/qtx11extras_p.h>
 
 /* map of ASCII non-dead keys to equivalent dead keys that need to be repeated */
 static const QPair<KeySym, KeySym> deadMap[] = {
