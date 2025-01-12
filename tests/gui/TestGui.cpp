@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -679,8 +679,10 @@ void TestGui::testEditEntry()
 
     // Test entry colors (simulate choosing a color)
     editEntryWidget->switchToPage(EditEntryWidget::Page::Advanced);
-    auto fgColor = QString("#FF0000");
-    auto bgColor = QString("#0000FF");
+    //auto fgColor = QString("#FF0000");
+    //auto bgColor = QString("#0000FF");
+    auto fgColor = QColor::fromString("#FF0000");
+    auto bgColor = QColor::fromString("#0000FF");
     // Set foreground color
     auto colorButton = editEntryWidget->findChild<QPushButton*>("fgColorButton");
     auto colorCheckBox = editEntryWidget->findChild<QCheckBox*>("fgColorCheckBox");
@@ -714,9 +716,9 @@ void TestGui::testEditEntry()
     // Confirm edit was made
     QCOMPARE(m_dbWidget->currentMode(), DatabaseWidget::Mode::ViewMode);
     QCOMPARE(entry->title(), QString("Sample Entry_test"));
-    QCOMPARE(entry->foregroundColor().toUpper(), fgColor.toUpper());
+    QCOMPARE(entry->foregroundColor().toUpper(), fgColor.name().toUpper());
     QCOMPARE(entryItem.data(Qt::ForegroundRole), QVariant(fgColor));
-    QCOMPARE(entry->backgroundColor().toUpper(), bgColor.toUpper());
+    QCOMPARE(entry->backgroundColor().toUpper(), bgColor.name().toUpper());
     QCOMPARE(entryItem.data(Qt::BackgroundRole), QVariant(bgColor));
     QCOMPARE(entry->historyItems().size(), ++editCount);
 
@@ -2078,7 +2080,7 @@ void TestGui::testShortcutConfig()
     ActionCollection::instance()->addAction(a);
     QVERIFY(ActionCollection::instance()->actions().contains(a));
 
-    const QKeySequence seq(Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_N);
+    const QKeySequence seq(Qt::CTRL | Qt::SHIFT | Qt::ALT | Qt::Key_N);
     ActionCollection::instance()->setDefaultShortcut(a, seq);
     QCOMPARE(ActionCollection::instance()->defaultShortcut(a), seq);
 
@@ -2089,7 +2091,7 @@ void TestGui::testShortcutConfig()
     QVERIFY(v);
 
     // Change shortcut and save
-    const QKeySequence newSeq(Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_M);
+    const QKeySequence newSeq(Qt::CTRL | Qt::SHIFT | Qt::ALT | Qt::Key_M);
     a->setShortcut(newSeq);
     QVERIFY(a->shortcut() != ActionCollection::instance()->defaultShortcut(a));
     ActionCollection::instance()->saveShortcuts();
