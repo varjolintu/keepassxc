@@ -212,7 +212,7 @@ QString NativeMessageInstaller::getNativeMessagePath(SupportedBrowsers browser) 
     if (Config::isPortable()) {
         basePath = Config::portableConfigDir();
     } else {
-        basePath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+        basePath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     }
     return QStringLiteral("%1/%2_%3.json").arg(basePath, HOST_NAME, getBrowserName(browser));
 #elif defined(KEEPASSXC_DIST_FLATPAK)
