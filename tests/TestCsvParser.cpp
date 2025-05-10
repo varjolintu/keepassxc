@@ -28,7 +28,7 @@ void TestCsvParser::writeToFile(const QString& contents)
         QFAIL("Cannot open temporary file!");
     }
     QTextStream out(file.data());
-    out.setCodec("UTF-8");
+    out.setEncoding(QStringConverter::Utf8);
     out << contents;
     out.flush();
     file->close();

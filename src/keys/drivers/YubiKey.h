@@ -85,7 +85,7 @@ signals:
 private:
     explicit YubiKey();
 
-    void findValidKeys(const QMutexLocker& locker);
+    void findValidKeys(const QMutexLocker<QRecursiveMutex>& locker);
 
     static YubiKey* m_instance;
 

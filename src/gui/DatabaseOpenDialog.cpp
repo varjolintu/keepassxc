@@ -25,10 +25,6 @@
 #include <QLayout>
 #include <QShortcut>
 
-#ifdef Q_OS_WIN
-#include <QtPlatformHeaders/QWindowsWindowFunctions>
-#endif
-
 DatabaseOpenDialog::DatabaseOpenDialog(QWidget* parent)
     : QDialog(parent)
     , m_view(new DatabaseOpenWidget(this))
@@ -43,9 +39,7 @@ DatabaseOpenDialog::DatabaseOpenDialog(QWidget* parent)
 #endif
     // block input to the main window/application while the dialog is open
     setWindowModality(Qt::ApplicationModal);
-#ifdef Q_OS_WIN
-    QWindowsWindowFunctions::setWindowActivationBehavior(QWindowsWindowFunctions::AlwaysActivateWindow);
-#endif
+
     connect(m_view, &DatabaseOpenWidget::dialogFinished, this, &DatabaseOpenDialog::complete);
 
     m_tabBar->setAutoHide(true);

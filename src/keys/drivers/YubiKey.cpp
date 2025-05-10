@@ -78,7 +78,7 @@ bool YubiKey::findValidKeys()
     return !m_usbKeys.isEmpty() || !m_pcscKeys.isEmpty();
 }
 
-void YubiKey::findValidKeys(const QMutexLocker& locker)
+void YubiKey::findValidKeys(const QMutexLocker<QRecursiveMutex>& locker)
 {
     // Check QMutexLocker since version 6.4
     Q_UNUSED(locker);
@@ -104,7 +104,7 @@ YubiKey::KeyMap YubiKey::foundKeys()
 
 int YubiKey::connectedKeys()
 {
-    QMutexLocker lock(&s_interfaceMutex);
+    QMutexLocker lock(&m_interfaces_detect_mutex);
 
     return m_connectedKeys;
 }
