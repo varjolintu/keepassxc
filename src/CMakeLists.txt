@@ -425,11 +425,9 @@ install(TARGETS ${PROGNAME}
 
 # Windows Installer Definition
 if(WIN32)
-    if(${CMAKE_SIZEOF_VOID_P} EQUAL "8")
-        set(OUTPUT_FILE_POSTFIX "Win64")
-    else()
-        set(OUTPUT_FILE_POSTFIX "Win32")
-    endif()
+    # Deploy used libraries into build directory for debugging
+    add_custom_command(TARGET ${PROGNAME} POST_BUILD
+        COMMAND ${WINDEPLOYQT_EXE} --dir $<TARGET_FILE_DIR:${PROGNAME}> $<TARGET_FILE:${PROGNAME}>)
 
     # We have to copy the license file in the configuration phase.
     # CMake checks that CPACK_RESOURCE_FILE_LICENSE actually exists and
