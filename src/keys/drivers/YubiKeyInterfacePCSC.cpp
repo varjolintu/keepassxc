@@ -41,6 +41,13 @@ typedef unsigned long SCUINT;
 typedef long RETVAL;
 #endif
 
+// Use the ANSI functions on Windows to align with Linux/macOS
+#ifdef Q_OS_WIN
+#define SCardListReaders SCardListReadersA
+#define SCardStatus SCardStatusA
+#define SCardConnect SCardConnectA
+#endif
+
 // This namescape contains static wrappers for the smart card API
 // Which enable the communication with a Yubikey via PCSC ADPUs
 namespace
@@ -105,15 +112,15 @@ namespace
         if (dwReaders == 0 || dwReaders > 16384) { // max 16kb
             return readers_list;
         }
-        wchar_t* mszReaders = new wchar_t[dwReaders + 2];
+        char* mszReaders = new char[dwReaders + 2];
 
         rv = SCardListReaders(context, nullptr, mszReaders, &dwReaders);
         if (rv == SCARD_S_SUCCESS) {
-            wchar_t* readhead = mszReaders;
+            char* readhead = mszReaders;
             // Names are separated by a null byte
             // The list is terminated by two null bytes
             while (*readhead != '\0') {
-                QString reader = QString::fromWCharArray(readhead);
+                QString reader = QString::fromUtf8(readhead);
                 readers_list.append(reader);
                 readhead += reader.size() + 1;
             }
@@ -137,7 +144,7 @@ namespace
      */
     RETVAL getCardStatus(SCARDHANDLE handle, SCUINT& dwProt, const SCARD_IO_REQUEST*& pioSendPci)
     {
-        wchar_t pbReader[MAX_READERNAME] = {0}; // Name of the reader the card is placed in
+        char pbReader[MAX_READERNAME] = {0}; // Name of the reader the card is placed in
         SCUINT dwReaderLen = sizeof(pbReader); // String length of the reader name
         SCUINT dwState = 0; // Unused. Contents differ depending on API implementation.
         uint8_t pbAtr[MAX_ATR_SIZE] = {0}; // ATR record
@@ -431,7 +438,7 @@ namespace
             SCARDHANDLE hCard;
             SCUINT dwActiveProtocol = SCARD_PROTOCOL_UNDEFINED;
             rv = SCardConnect(context,
-                              reader_name.toStdWString().c_str(),
+                              reader_name.toStdString().c_str(),
                               SCARD_SHARE_SHARED,
                               SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1,
                               &hCard,
@@ -439,7 +446,7 @@ namespace
 
             if (rv == SCARD_S_SUCCESS) {
                 // Read the ATR record of the card
-                wchar_t pbReader[MAX_READERNAME] = {0};
+                char pbReader[MAX_READERNAME] = {0};
                 SCUINT dwReaderLen = sizeof(pbReader);
                 SCUINT dwState = 0;
                 SCUINT dwProt = SCARD_PROTOCOL_UNDEFINED;
@@ -568,7 +575,7 @@ YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys(int& connectedKeys)
         SCARDHANDLE hCard;
         SCUINT dwActiveProtocol = SCARD_PROTOCOL_UNDEFINED;
         auto rv = SCardConnect(m_sc_context,
-                               reader_name.toStdWString().c_str(),
+                               reader_name.toStdString().c_str(),
                                SCARD_SHARE_SHARED,
                                SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1,
                                &hCard,
@@ -582,7 +589,7 @@ YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys(int& connectedKeys)
         auto finally = qScopeGuard([hCard]() { SCardDisconnect(hCard, SCARD_LEAVE_CARD); });
 
         // Read the protocol and the ATR record
-        wchar_t pbReader[MAX_READERNAME] = {0};
+        char pbReader[MAX_READERNAME] = {0};
         SCUINT dwReaderLen = sizeof(pbReader);
         SCUINT dwState = 0;
         SCUINT dwProt = SCARD_PROTOCOL_UNDEFINED;

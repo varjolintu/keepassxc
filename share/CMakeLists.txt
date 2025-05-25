@@ -78,17 +78,17 @@ endif()
 install(FILES icons/application/256x256/apps/keepassxc.png DESTINATION ${DATA_INSTALL_DIR}/icons/application/256x256/apps)
 
 add_custom_target(icons)
-add_custom_command(TARGET icons
+add_custom_command(TARGET icons POST_BUILD
         COMMAND bash ./icons/minify.sh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 if(APPLE)
-    add_custom_command(TARGET icons
+    add_custom_command(TARGET icons POST_BUILD
             COMMAND png2icns macosx/keepassxc.icns icons/application/256x256/apps/keepassxc.png
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 # ICO for Windows
-add_custom_command(TARGET icons
+add_custom_command(TARGET icons POST_BUILD
     COMMAND bash ./windows/create-ico.sh icons/application/scalable/apps/keepassxc.svg windows/keepassxc.ico
     COMMAND bash ./windows/create-ico.sh icons/application/scalable/mimetypes/application-x-keepassxc.svg windows/keepassxc-kdbx.ico
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

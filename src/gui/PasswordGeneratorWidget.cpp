@@ -77,7 +77,7 @@ PasswordGeneratorWidget::PasswordGeneratorWidget(QWidget* parent)
 
     connect(m_ui->editWordSeparator, SIGNAL(textChanged(QString)), SLOT(updateGenerator()));
     connect(m_ui->comboBoxWordList, SIGNAL(currentIndexChanged(int)), SLOT(updateGenerator()));
-    connect(m_ui->optionButtons, SIGNAL(buttonClicked(int)), SLOT(updateGenerator()));
+    connect(m_ui->optionButtons, SIGNAL(buttonClicked(QAbstractButton*)), SLOT(updateGenerator()));
     connect(m_ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(updateGenerator()));
     connect(m_ui->wordCaseComboBox, SIGNAL(currentIndexChanged(int)), SLOT(updateGenerator()));
 
