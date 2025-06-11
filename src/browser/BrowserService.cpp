@@ -34,6 +34,7 @@
 #include "BrowserPasskeys.h"
 #include "BrowserPasskeysClient.h"
 #include "BrowserPasskeysConfirmationDialog.h"
+#include "CredentialDialog.h"
 #include "PasskeyUtils.h"
 #include "gui/passkeys/PasskeyImporter.h"
 #endif
@@ -862,15 +863,78 @@ void BrowserService::addPasskeyToEntry(Entry* entry,
 }
 #endif
 
+bool BrowserService::createEntry(const EntryParameters& entryParameters,
+                                 const bool downloadFavicon)
+{
+    auto db = getDatabase(entryParameters.dbid);
+    if (!db) {
+        return false;
+    }
+
+    CredentialDialog credentialDialog(m_currentDatabaseWidget);
+    credentialDialog.setInfo(entryParameters.siteUrl, entryParameters.login, db, false);
+
+    auto ret = credentialDialog.exec();
+    if (ret != QDialog::Accepted) {
+        return false;
+    }
+
+    auto selectedDb = credentialDialog.getSelectedDatabase();
+
+    // Update password to selected entry
+    if (!credentialDialog.createNewEntry()) {
+        auto groupUuid = credentialDialog.getSelectedGroupUuid();
+        auto group = db->rootGroup()->findGroupByUuid(groupUuid);
+
+        if (group) {
+            auto selectedEntry = group->findEntryByUuid(credentialDialog.getSelectedEntryUuid());
+            if (selectedEntry) {
+                updateEntry(entryParameters, selectedEntry, selectedDb);
+            }
+        }
+
+        return true;
+    }
+
+    // Group settings. Use default group if user did not select a specific one.
+    Group* group = nullptr;
+
+    // Attempt to use the selected group
+    if (!credentialDialog.useDefaultGroup()) {
+        auto groupUuid = credentialDialog.getSelectedGroupUuid();
+        group = selectedDb->rootGroup()->findGroupByUuid(groupUuid);
+    }
+
+    // Use default group if requested or if the selected group does not exist
+    if (!group) {
+        group = getDefaultGroup(selectedDb);
+    }
+
+    addEntry(entryParameters, group, downloadFavicon, selectedDb);
+    return true;
+}
+
+Group* BrowserService::getDefaultGroup(QSharedPointer<Database>& database) const
+{
+    auto defaultGroup = database->rootGroup()->findGroupByPath(KEEPASSXCBROWSER_GROUP_NAME);
+
+    // Create the default group if it does not exist
+    if (!defaultGroup) {
+        defaultGroup = new Group();
+        defaultGroup->setName(KEEPASSXCBROWSER_GROUP_NAME);
+        defaultGroup->setUuid(QUuid::createUuid());
+        defaultGroup->setParent(database->rootGroup());
+    }
+
+    return defaultGroup;
+}
+
 void BrowserService::addEntry(const EntryParameters& entryParameters,
-                              const QString& group,
-                              const QString& groupUuid,
+                              Group* group,
                               const bool downloadFavicon,
                               const QSharedPointer<Database>& selectedDb)
 {
-    // TODO: select database based on this key id
-    auto db = selectedDb ? selectedDb : selectedDatabase();
-    if (!db) {
+    if (!selectedDb) {
         return;
     }
 
@@ -883,17 +947,10 @@ void BrowserService::addEntry(const EntryParameters& entryParameters,
     entry->setPassword(entryParameters.password);
 
     // Select a group for the entry
-    if (!group.isEmpty()) {
-        if (db->rootGroup()) {
-            auto selectedGroup = db->rootGroup()->findGroupByUuid(Tools::hexToUuid(groupUuid));
-            if (selectedGroup) {
-                entry->setGroup(selectedGroup);
-            } else {
-                entry->setGroup(getDefaultEntryGroup(db));
-            }
-        }
+    if (group) {
+        entry->setGroup(group);
     } else {
-        entry->setGroup(getDefaultEntryGroup(db));
+        entry->setGroup(getDefaultEntryGroup(selectedDb));
     }
 
     const QString host = QUrl(entryParameters.siteUrl).host();
@@ -914,26 +971,19 @@ void BrowserService::addEntry(const EntryParameters& entryParameters,
     }
 }
 
-bool BrowserService::updateEntry(const EntryParameters& entryParameters, const QString& uuid)
+bool BrowserService::updateEntry(const EntryParameters& entryParameters,
+                                 Entry* entry,
+                                 const QSharedPointer<Database>& selectedDb)
 {
-    // TODO: select database based on this key id
-    auto db = selectedDatabase();
-    if (!db) {
+    if (!selectedDb || !entry) {
         return false;
-    }
-
-    auto entry = db->rootGroup()->findEntryByUuid(Tools::hexToUuid(uuid));
-    if (!entry) {
-        // If entry is not found for update, add a new one to the selected database
-        addEntry(entryParameters, "", "", false, db);
-        return true;
     }
 
     // Check if the entry password is a reference. If so, update the original entry instead
     while (entry->attributes()->isReference(EntryAttributes::PasswordKey)) {
         const QUuid referenceUuid = entry->attributes()->referenceUuid(EntryAttributes::PasswordKey);
         if (!referenceUuid.isNull()) {
-            entry = db->rootGroup()->findEntryByUuid(referenceUuid);
+            entry = selectedDb->rootGroup()->findEntryByUuid(referenceUuid);
             if (!entry) {
                 return false;
             }

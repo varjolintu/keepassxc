@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
  */
 
 #include "PasskeyImporter.h"
-#include "PasskeyImportDialog.h"
 #include "browser/BrowserMessageBuilder.h"
 #include "browser/BrowserPasskeys.h"
 #include "browser/BrowserService.h"
+#include "browser/CredentialDialog.h"
 #include "core/Entry.h"
 #include "core/Group.h"
 #include "core/Tools.h"
@@ -104,9 +104,9 @@ bool PasskeyImporter::showImportDialog(QSharedPointer<Database>& database,
                                        const QString& infoText,
                                        const QString& importButtonText)
 {
-    PasskeyImportDialog passkeyImportDialog(m_parent);
+    CredentialDialog passkeyImportDialog(m_parent);
     passkeyImportDialog.setInfo(
-        relyingParty, username, database, entry != nullptr, titleText, infoText, importButtonText);
+        relyingParty, username, database, entry != nullptr, titleText, infoText, importButtonText, true);
 
     auto ret = passkeyImportDialog.exec();
     if (ret != QDialog::Accepted) {

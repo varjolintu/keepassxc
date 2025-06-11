@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -311,9 +311,6 @@ QJsonObject BrowserAction::handleSetLogin(const QJsonObject& json, const QString
     const auto login = browserRequest.getString("login");
     const auto password = browserRequest.getString("password");
     const auto submitUrl = browserRequest.getString("submitUrl");
-    const auto uuid = browserRequest.getString("uuid");
-    const auto group = browserRequest.getString("group");
-    const auto groupUuid = browserRequest.getString("groupUuid");
     const auto downloadFavicon = browserRequest.getString("downloadFavicon");
     const QString realm;
 
@@ -325,17 +322,8 @@ QJsonObject BrowserAction::handleSetLogin(const QJsonObject& json, const QString
     entryParameters.formUrl = submitUrl;
     entryParameters.realm = realm;
 
-    bool result = true;
-    if (uuid.isEmpty()) {
-        auto dlFavicon = !downloadFavicon.isEmpty() && downloadFavicon.compare(TRUE_STR) == 0;
-        browserService()->addEntry(entryParameters, group, groupUuid, dlFavicon);
-    } else {
-        if (!Tools::isValidUuid(uuid)) {
-            return getErrorReply(action, ERROR_KEEPASS_NO_VALID_UUID_PROVIDED);
-        }
-
-        result = browserService()->updateEntry(entryParameters, uuid);
-    }
+    auto dlFavicon = !downloadFavicon.isEmpty() && downloadFavicon.compare(TRUE_STR) == 0;
+    auto result = browserService()->createEntry(entryParameters, dlFavicon);
 
     const Parameters params{{"count", QJsonValue::Null},
                             {"entries", QJsonValue::Null},

@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -297,8 +297,7 @@ if(WITH_XC_BROWSER_PASSKEYS)
             gui/reports/ReportsPagePasskeys.cpp
             gui/passkeys/PasskeyExporter.cpp
             gui/passkeys/PasskeyExportDialog.cpp
-            gui/passkeys/PasskeyImporter.cpp
-            gui/passkeys/PasskeyImportDialog.cpp)
+            gui/passkeys/PasskeyImporter.cpp)
 endif()
 
 add_subdirectory(autotype)

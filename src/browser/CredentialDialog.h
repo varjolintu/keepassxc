@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSXC_PASSKEYIMPORTDIALOG_H
-#define KEEPASSXC_PASSKEYIMPORTDIALOG_H
+#ifndef KEEPASSXC_CREDENTIALDIALOG_H
+#define KEEPASSXC_CREDENTIALDIALOG_H
 
 #include "core/Database.h"
 #include "core/Group.h"
@@ -25,24 +25,25 @@
 
 namespace Ui
 {
-    class PasskeyImportDialog;
+    class CredentialDialog;
 }
 
-class PasskeyImportDialog : public QDialog
+class CredentialDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit PasskeyImportDialog(QWidget* parent = nullptr);
-    ~PasskeyImportDialog() override;
+    explicit CredentialDialog(QWidget* parent = nullptr);
+    ~CredentialDialog() override;
 
-    void setInfo(const QString& relyingParty,
+    void setInfo(const QString& location,
                  const QString& username,
                  const QSharedPointer<Database>& database,
                  bool isEntry,
                  const QString& titleText = {},
                  const QString& infoText = {},
-                 const QString& importButtonText = {});
+                 const QString& createButtonText = {},
+                 bool isPasskey = false);
     QSharedPointer<Database> getSelectedDatabase() const;
     QUuid getSelectedEntryUuid() const;
     QUuid getSelectedGroupUuid() const;
@@ -64,11 +65,12 @@ private slots:
     void changeGroup(int index);
 
 private:
-    QScopedPointer<Ui::PasskeyImportDialog> m_ui;
+    QScopedPointer<Ui::CredentialDialog> m_ui;
     QSharedPointer<Database> m_selectedDatabase;
     QUuid m_selectedDatabaseUuid;
     QUuid m_selectedEntryUuid;
     QUuid m_selectedGroupUuid;
+    bool m_isPasskey;
 };
 
-#endif // KEEPASSXC_PASSKEYIMPORTDIALOG_H
+#endif // KEEPASSXC_CREDENTIALDIALOG_H

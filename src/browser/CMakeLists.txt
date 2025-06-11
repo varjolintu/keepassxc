@@ -1,4 +1,4 @@
-#  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ if(WITH_XC_BROWSER)
             BrowserService.cpp
             BrowserSettings.cpp
             BrowserShared.cpp
+            CredentialDialog.cpp
             CustomTableWidget.cpp
             NativeMessageInstaller.cpp)
 
