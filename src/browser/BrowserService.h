@@ -46,11 +46,10 @@ struct KeyPairMessage
 
 struct EntryParameters
 {
-    //QString dbid;
+    // QString dbid;
     QString title;
     QString login;
     QString password;
-    QString realm;
     QString hash;
     QString siteUrl;
     QString formUrl;
@@ -116,10 +115,13 @@ public:
                            const QString& privateKey);
 
     void addEntry(const EntryParameters& entryParameters,
-                  const QString& groupPath,
+                  Group* group,
                   const bool downloadFavicon,
                   const QSharedPointer<Database>& selectedDb = {});
-    bool updateEntry(const EntryParameters& entryParameters, const QString& uuid);
+    bool createEntry(const EntryParameters& entryParameters, const bool downloadFavicon);
+    Group* getDefaultGroup(QSharedPointer<Database>& database) const;
+    bool
+    updateEntry(const EntryParameters& entryParameters, Entry* entry, const QSharedPointer<Database>& selectedDb = {});
     bool deleteEntry(const QString& uuid);
     void removePluginData(Entry* entry) const;
     QJsonArray findEntries(const EntryParameters& entryParameters, const StringPairList& keyList, bool* entriesFound);
@@ -179,10 +181,10 @@ private:
                                  const QString& formUrl,
                                  const bool httpAuth);
     QJsonObject prepareEntry(const Entry* entry);
-    void allowEntry(Entry* entry, const QString& siteHost, const QString& formUrl, const QString& realm);
-    void denyEntry(Entry* entry, const QString& siteHost, const QString& formUrl, const QString& realm);
+    void allowEntry(Entry* entry, const QString& siteHost, const QString& formUrl);
+    void denyEntry(Entry* entry, const QString& siteHost, const QString& formUrl);
     QJsonArray getChildrenFromGroup(Group* group);
-    Access checkAccess(const Entry* entry, const QString& siteHost, const QString& formHost, const QString& realm);
+    Access checkAccess(const Entry* entry, const QString& siteHost, const QString& formHost);
     Group* getDefaultEntryGroup(const QSharedPointer<Database>& selectedDb = {});
     int sortPriority(const QStringList& urls, const QString& siteUrl, const QString& formUrl);
     bool removeFirstDomain(QString& hostname);

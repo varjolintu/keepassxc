@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PasskeyImportDialog.h"
-#include "ui_PasskeyImportDialog.h"
+#include "CredentialDialog.h"
+#include "ui_CredentialDialog.h"
 
 #include "browser/BrowserService.h"
 #include "core/Metadata.h"
@@ -24,9 +24,9 @@
 #include <QCloseEvent>
 #include <QFileInfo>
 
-PasskeyImportDialog::PasskeyImportDialog(QWidget* parent)
+CredentialDialog::CredentialDialog(QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui::PasskeyImportDialog())
+    , m_ui(new Ui::CredentialDialog())
 {
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
@@ -34,28 +34,38 @@ PasskeyImportDialog::PasskeyImportDialog(QWidget* parent)
 
     connect(this, SIGNAL(updateGroups()), this, SLOT(addGroups()));
     connect(this, SIGNAL(updateEntries()), this, SLOT(addEntries()));
-    connect(m_ui->importButton, SIGNAL(clicked()), SLOT(accept()));
+    connect(m_ui->createButton, SIGNAL(clicked()), SLOT(accept()));
     connect(m_ui->cancelButton, SIGNAL(clicked()), SLOT(reject()));
     connect(m_ui->selectDatabaseCombobBox, SIGNAL(currentIndexChanged(int)), SLOT(changeDatabase(int)));
     connect(m_ui->selectEntryComboBox, SIGNAL(currentIndexChanged(int)), SLOT(changeEntry(int)));
     connect(m_ui->selectGroupComboBox, SIGNAL(currentIndexChanged(int)), SLOT(changeGroup(int)));
 }
 
-PasskeyImportDialog::~PasskeyImportDialog()
+CredentialDialog::~CredentialDialog()
 {
 }
 
-void PasskeyImportDialog::setInfo(const QString& relyingParty,
-                                  const QString& username,
-                                  const QSharedPointer<Database>& database,
-                                  bool isEntry,
-                                  const QString& titleText,
-                                  const QString& infoText,
-                                  const QString& importButtonText)
+void CredentialDialog::setInfo(const QString& location,
+                               const QString& username,
+                               const QSharedPointer<Database>& database,
+                               bool isEntry,
+                               const QString& titleText,
+                               const QString& infoText,
+                               const QString& createButtonText,
+                               bool isPasskey)
 {
-    m_ui->relyingPartyLabel->setText(tr("Relying Party: %1").arg(relyingParty));
+    if (isPasskey) {
+        setWindowTitle(tr("KeePassXC - Passkey Import"));
+        m_ui->infoLabel->setText(tr("Import the following passkey:"));
+        m_ui->locationLabel->setText(tr("Relying Party: %1").arg(location));
+    } else {
+        setWindowTitle(tr("KeePassXC - Create or update credential"));
+        m_ui->infoLabel->setText(tr("Create or update the following credential:"));
+        m_ui->locationLabel->setText(tr("URL: %1").arg(location));
+    }
     m_ui->usernameLabel->setText(tr("Username: %1").arg(username));
 
+    // Only passkeys use this parameter
     if (isEntry) {
         m_ui->verticalLayout->setSizeConstraint(QLayout::SetFixedSize);
         m_ui->infoLabel->setText(tr("Import the following passkey to this entry:"));
@@ -82,37 +92,39 @@ void PasskeyImportDialog::setInfo(const QString& relyingParty,
         m_ui->infoLabel->setText(infoText);
     }
 
-    if (!importButtonText.isEmpty()) {
-        m_ui->importButton->setText(importButtonText);
+    if (!createButtonText.isEmpty()) {
+        m_ui->createButton->setText(createButtonText);
     }
+
+    m_isPasskey = isPasskey;
 }
 
-QSharedPointer<Database> PasskeyImportDialog::getSelectedDatabase() const
+QSharedPointer<Database> CredentialDialog::getSelectedDatabase() const
 {
     return m_selectedDatabase;
 }
 
-QUuid PasskeyImportDialog::getSelectedEntryUuid() const
+QUuid CredentialDialog::getSelectedEntryUuid() const
 {
     return m_selectedEntryUuid;
 }
 
-QUuid PasskeyImportDialog::getSelectedGroupUuid() const
+QUuid CredentialDialog::getSelectedGroupUuid() const
 {
     return m_selectedGroupUuid;
 }
 
-bool PasskeyImportDialog::useDefaultGroup() const
+bool CredentialDialog::useDefaultGroup() const
 {
     return m_selectedGroupUuid.isNull();
 }
 
-bool PasskeyImportDialog::createNewEntry() const
+bool CredentialDialog::createNewEntry() const
 {
     return m_selectedEntryUuid.isNull();
 }
 
-void PasskeyImportDialog::addDatabases()
+void CredentialDialog::addDatabases()
 {
     auto currentDatabaseIndex = 0;
     const auto openDatabases = browserService()->getOpenDatabases();
@@ -129,7 +141,7 @@ void PasskeyImportDialog::addDatabases()
     m_ui->selectDatabaseCombobBox->setCurrentIndex(currentDatabaseIndex);
 }
 
-void PasskeyImportDialog::addEntries()
+void CredentialDialog::addEntries()
 {
     if (!m_selectedDatabase || !m_selectedDatabase->rootGroup()) {
         return;
@@ -163,14 +175,18 @@ void PasskeyImportDialog::addEntries()
     }
 }
 
-void PasskeyImportDialog::addGroups()
+void CredentialDialog::addGroups()
 {
     if (!m_selectedDatabase) {
         return;
     }
 
     m_ui->selectGroupComboBox->clear();
-    m_ui->selectGroupComboBox->addItem(tr("Default passkeys group (Imported Passkeys)"), {});
+    if (m_isPasskey) {
+        m_ui->selectGroupComboBox->addItem(tr("Default passkeys group (Imported Passkeys)"), {});
+    } else {
+        m_ui->selectGroupComboBox->addItem(tr("Default browser group"), {});
+    }
 
     for (const auto& group : m_selectedDatabase->rootGroup()->groupsRecursive(true)) {
         if (!group || group->isRecycled() || group == m_selectedDatabase->metadata()->recycleBin()) {
@@ -181,19 +197,19 @@ void PasskeyImportDialog::addGroups()
     }
 }
 
-void PasskeyImportDialog::changeDatabase(int index)
+void CredentialDialog::changeDatabase(int index)
 {
     m_selectedDatabaseUuid = m_ui->selectDatabaseCombobBox->itemData(index).value<QUuid>();
     m_selectedDatabase = browserService()->getDatabase(m_selectedDatabaseUuid);
     emit updateGroups();
 }
 
-void PasskeyImportDialog::changeEntry(int index)
+void CredentialDialog::changeEntry(int index)
 {
     m_selectedEntryUuid = m_ui->selectEntryComboBox->itemData(index).value<QUuid>();
 }
 
-void PasskeyImportDialog::changeGroup(int index)
+void CredentialDialog::changeGroup(int index)
 {
     m_selectedGroupUuid = m_ui->selectGroupComboBox->itemData(index).value<QUuid>();
     emit updateEntries();

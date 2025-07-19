@@ -170,7 +170,6 @@ QJsonObject BrowserAction::handleChangePublicKeys(const QJsonObject& message)
     return response;
 }
 
-// TODO: Change to path-only, but provide a database UUID too
 QJsonObject BrowserAction::handleCreateCredentials(const BrowserRequest& browserRequest)
 {
     if (!isDatabaseConnected(browserRequest)) {
@@ -185,34 +184,21 @@ QJsonObject BrowserAction::handleCreateCredentials(const BrowserRequest& browser
     const auto login = browserRequest.getString("login");
     const auto password = browserRequest.getString("password");
     const auto submitUrl = browserRequest.getString("submitUrl");
-    const auto uuid = browserRequest.getString("uuid");
-    const auto groupPath = browserRequest.getString("groupPath");
-    //const auto databaseUuid = browserRequest.getString("databaseUuid"); // TODO: Use this
     const auto downloadFavicon = browserRequest.getBool("downloadFavicon");
-    const QString realm;
 
     EntryParameters entryParameters;
     entryParameters.login = login;
     entryParameters.password = password;
     entryParameters.siteUrl = url;
     entryParameters.formUrl = submitUrl;
-    entryParameters.realm = realm;
 
-    bool result = true;
-    if (uuid.isEmpty()) {
-        browserService()->addEntry(entryParameters, groupPath, downloadFavicon);
-    } else {
-        if (!Tools::isValidUuid(uuid)) {
-            return buildErrorResponse(browserRequest, ERROR_KEEPASS_NO_VALID_UUID_PROVIDED);
-        }
-
-        result = browserService()->updateEntry(entryParameters, uuid);
-    }
+    auto result = browserService()->createEntry(entryParameters, downloadFavicon);
 
     const ResponseParameters params{{"result", result}};
     return buildResponse(browserRequest, params);
 }
 
+// TODO: This is no longer needed with the new credential saving implementation
 QJsonObject BrowserAction::handleCreateNewGroup(const BrowserRequest& browserRequest)
 {
     if (!isDatabaseConnected(browserRequest)) {

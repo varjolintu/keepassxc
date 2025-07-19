@@ -282,8 +282,7 @@ if(KPXC_FEATURE_BROWSER)
             gui/reports/ReportsWidgetPasskeys.cpp
             gui/passkeys/PasskeyExporter.cpp
             gui/passkeys/PasskeyExportDialog.cpp
-            gui/passkeys/PasskeyImporter.cpp
-            gui/passkeys/PasskeyImportDialog.cpp)
+            gui/passkeys/PasskeyImporter.cpp)
 endif()
 
 if(KPXC_FEATURE_NETWORK)

@@ -32,6 +32,7 @@ if(KPXC_FEATURE_BROWSER)
             BrowserService.cpp
             BrowserSettings.cpp
             BrowserShared.cpp
+            CredentialDialog.cpp
             CustomTableWidget.cpp
             NativeMessageInstaller.cpp
             PasskeyUtils.cpp)
