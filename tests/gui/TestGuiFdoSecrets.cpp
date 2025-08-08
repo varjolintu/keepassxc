@@ -131,6 +131,7 @@ char* toString(const QDBusObjectPath& path)
     return QTest::toString("ObjectPath(" + path.path() + ")");
 }
 
+TestGuiFdoSecrets::TestGuiFdoSecrets() = default;
 TestGuiFdoSecrets::~TestGuiFdoSecrets() = default;
 
 void TestGuiFdoSecrets::initTestCase()

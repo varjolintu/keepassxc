@@ -290,7 +290,7 @@ bool NixUtils::triggerGlobalShortcut(uint keycode, uint modifiers)
 bool NixUtils::registerGlobalShortcut(const QString& name, Qt::Key key, Qt::KeyboardModifiers modifiers, QString* error)
 {
 #ifdef WITH_X11
-    auto keycode = XKeysymToKeycode(dpy, qcharToNativeKeyCode(QChar(key)));
+    auto keycode = XKeysymToKeycode(dpy, qtToNativeKeyCode(key));
     auto modifierscode = qtToNativeModifiers(modifiers);
 
     // Check if this key combo is registered to another shortcut
