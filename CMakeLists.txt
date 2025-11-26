@@ -402,7 +402,7 @@ if(WITH_COVERAGE)
 endif()
 
 # Find Qt
-set(QT_COMPONENTS Core Network Concurrent Gui Svg Widgets Test LinguistTools)
+set(QT_COMPONENTS Core Network Concurrent Gui GuiPrivate Svg Widgets Test LinguistTools)
 if(UNIX AND NOT APPLE)
     find_package(Qt6 COMPONENTS ${QT_COMPONENTS} DBus REQUIRED)
 elseif(APPLE)
