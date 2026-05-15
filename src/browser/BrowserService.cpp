@@ -1740,7 +1740,8 @@ QList<QSharedPointer<Database>> BrowserService::getConnectedDatabases(const Stri
     for (const auto& db : openDatabases) {
         const auto hash = getDatabaseHash(db->rootGroup()->uuidToHex());
         for (const auto& dbStatus : databaseStatuses) {
-            if (dbStatus["hash"].toString() == hash && dbStatus["associated"] == true) {
+            const auto& status = dbStatus.toObject();
+            if (status["hash"].toString() == hash && status["associated"] == true) {
                 connectedDatabases << db;
             }
         }
@@ -1756,7 +1757,8 @@ bool BrowserService::isDatabaseConnected(const StringPairList& keyList, const QS
     const auto hash = databaseHash.isEmpty() ? getDatabaseHash() : databaseHash;
 
     return std::any_of(databaseStatuses.begin(), databaseStatuses.end(), [&hash](const auto& status) {
-        return status["hash"].toString() == hash && status["associated"] == true;
+        const auto statusObject = status.toObject();
+        return statusObject["hash"].toString() == hash && statusObject["associated"] == true;
     });
 }
 
@@ -1881,6 +1883,6 @@ void BrowserService::processClientMessage(const QJsonObject& message, QLocalSock
     }
 
     const auto& action = m_browserClients.value(clientID);
-    auto response = action->processClientMessage(socket, message);
+    auto response = action->processClientMessage(message, socket);
     m_browserHost->sendClientMessage(socket, response);
 }
