@@ -67,7 +67,7 @@ namespace EntryPlaceholders
         Regex
     };
 
-    PlaceholderType placeholderType(const QString& placeholder, int maxDepth = ResolveMaximumDepth);
+    PlaceholderType placeholderType(const QString& placeholder);
     QString resolveUrlPlaceholder(const QString& str, PlaceholderType placeholderType);
     QString resolveDateTimePlaceholder(PlaceholderType placeholderType);
     QString maskPasswordPlaceholders(const QString& str);

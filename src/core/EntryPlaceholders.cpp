@@ -26,13 +26,49 @@
 
 namespace EntryPlaceholders
 {
-    PlaceholderType placeholderType(const QString& placeholder, int maxDepth)
-    {
-        if (--maxDepth < 0) {
-            qWarning() << "Maximum depth of replacement has been reached. Placeholder: " << placeholder;
-            return PlaceholderType::Unknown;
-        }
+    static const QMap<QString, PlaceholderType> Placeholders{
+        {QStringLiteral("{TITLE}"), PlaceholderType::Title},
+        {QStringLiteral("{USERNAME}"), PlaceholderType::UserName},
+        {QStringLiteral("{PASSWORD}"), PlaceholderType::Password},
+        {QStringLiteral("{NOTES}"), PlaceholderType::Notes},
+        {QStringLiteral("{TOTP}"), PlaceholderType::Totp},
+        {QStringLiteral("{TIMEOTP}"), PlaceholderType::Totp},
+        {QStringLiteral("{URL}"), PlaceholderType::Url},
+        {QStringLiteral("{UUID}"), PlaceholderType::Uuid},
+        {QStringLiteral("{URL:RMVSCM}"), PlaceholderType::UrlWithoutScheme},
+        {QStringLiteral("{URL:WITHOUTSCHEME}"), PlaceholderType::UrlWithoutScheme},
+        {QStringLiteral("{URL:SCM}"), PlaceholderType::UrlScheme},
+        {QStringLiteral("{URL:SCHEME}"), PlaceholderType::UrlScheme},
+        {QStringLiteral("{URL:HOST}"), PlaceholderType::UrlHost},
+        {QStringLiteral("{URL:PORT}"), PlaceholderType::UrlPort},
+        {QStringLiteral("{URL:PATH}"), PlaceholderType::UrlPath},
+        {QStringLiteral("{URL:QUERY}"), PlaceholderType::UrlQuery},
+        {QStringLiteral("{URL:FRAGMENT}"), PlaceholderType::UrlFragment},
+        {QStringLiteral("{URL:USERINFO}"), PlaceholderType::UrlUserInfo},
+        {QStringLiteral("{URL:USERNAME}"), PlaceholderType::UrlUserName},
+        {QStringLiteral("{URL:PASSWORD}"), PlaceholderType::UrlPassword},
+        {QStringLiteral("{DT_SIMPLE}"), PlaceholderType::DateTimeSimple},
+        {QStringLiteral("{DT_YEAR}"), PlaceholderType::DateTimeYear},
+        {QStringLiteral("{DT_MONTH}"), PlaceholderType::DateTimeMonth},
+        {QStringLiteral("{DT_DAY}"), PlaceholderType::DateTimeDay},
+        {QStringLiteral("{DT_HOUR}"), PlaceholderType::DateTimeHour},
+        {QStringLiteral("{DT_MINUTE}"), PlaceholderType::DateTimeMinute},
+        {QStringLiteral("{DT_SECOND}"), PlaceholderType::DateTimeSecond},
+        {QStringLiteral("{DT_UTC_SIMPLE}"), PlaceholderType::DateTimeUtcSimple},
+        {QStringLiteral("{DT_UTC_YEAR}"), PlaceholderType::DateTimeUtcYear},
+        {QStringLiteral("{DT_UTC_MONTH}"), PlaceholderType::DateTimeUtcMonth},
+        {QStringLiteral("{DT_UTC_DAY}"), PlaceholderType::DateTimeUtcDay},
+        {QStringLiteral("{DT_UTC_HOUR}"), PlaceholderType::DateTimeUtcHour},
+        {QStringLiteral("{DT_UTC_MINUTE}"), PlaceholderType::DateTimeUtcMinute},
+        {QStringLiteral("{DT_UTC_SECOND}"), PlaceholderType::DateTimeUtcSecond},
+        {QStringLiteral("{DB_DIR}"), PlaceholderType::DbDir}};
 
+    static const QRegularExpression PlaceholderRegEx(Placeholders.keys().join('|'));
+    static const QRegularExpression DynamicPlaceholderRegEx(
+        "(?<={S:)(.*)(?=})|(?<={REF:)(.*)(?=})|(?<={T-CONV:)(.*)(?=})|(?<=T-REPLACE_RX:)(.*)(?=})");
+
+    PlaceholderType placeholderType(const QString& placeholder)
+    {
         if (!placeholder.startsWith(QStringLiteral("{")) || !placeholder.endsWith(QStringLiteral("}"))) {
             return PlaceholderType::NotPlaceholder;
         }
@@ -49,50 +85,7 @@ namespace EntryPlaceholders
             return PlaceholderType::Regex;
         }
 
-        static const QMap<QString, PlaceholderType> placeholders{
-            {QStringLiteral("{TITLE}"), PlaceholderType::Title},
-            {QStringLiteral("{USERNAME}"), PlaceholderType::UserName},
-            {QStringLiteral("{PASSWORD}"), PlaceholderType::Password},
-            {QStringLiteral("{NOTES}"), PlaceholderType::Notes},
-            {QStringLiteral("{TOTP}"), PlaceholderType::Totp},
-            {QStringLiteral("{TIMEOTP}"), PlaceholderType::Totp},
-            {QStringLiteral("{URL}"), PlaceholderType::Url},
-            {QStringLiteral("{UUID}"), PlaceholderType::Uuid},
-            {QStringLiteral("{URL:RMVSCM}"), PlaceholderType::UrlWithoutScheme},
-            {QStringLiteral("{URL:WITHOUTSCHEME}"), PlaceholderType::UrlWithoutScheme},
-            {QStringLiteral("{URL:SCM}"), PlaceholderType::UrlScheme},
-            {QStringLiteral("{URL:SCHEME}"), PlaceholderType::UrlScheme},
-            {QStringLiteral("{URL:HOST}"), PlaceholderType::UrlHost},
-            {QStringLiteral("{URL:PORT}"), PlaceholderType::UrlPort},
-            {QStringLiteral("{URL:PATH}"), PlaceholderType::UrlPath},
-            {QStringLiteral("{URL:QUERY}"), PlaceholderType::UrlQuery},
-            {QStringLiteral("{URL:FRAGMENT}"), PlaceholderType::UrlFragment},
-            {QStringLiteral("{URL:USERINFO}"), PlaceholderType::UrlUserInfo},
-            {QStringLiteral("{URL:USERNAME}"), PlaceholderType::UrlUserName},
-            {QStringLiteral("{URL:PASSWORD}"), PlaceholderType::UrlPassword},
-            {QStringLiteral("{DT_SIMPLE}"), PlaceholderType::DateTimeSimple},
-            {QStringLiteral("{DT_YEAR}"), PlaceholderType::DateTimeYear},
-            {QStringLiteral("{DT_MONTH}"), PlaceholderType::DateTimeMonth},
-            {QStringLiteral("{DT_DAY}"), PlaceholderType::DateTimeDay},
-            {QStringLiteral("{DT_HOUR}"), PlaceholderType::DateTimeHour},
-            {QStringLiteral("{DT_MINUTE}"), PlaceholderType::DateTimeMinute},
-            {QStringLiteral("{DT_SECOND}"), PlaceholderType::DateTimeSecond},
-            {QStringLiteral("{DT_UTC_SIMPLE}"), PlaceholderType::DateTimeUtcSimple},
-            {QStringLiteral("{DT_UTC_YEAR}"), PlaceholderType::DateTimeUtcYear},
-            {QStringLiteral("{DT_UTC_MONTH}"), PlaceholderType::DateTimeUtcMonth},
-            {QStringLiteral("{DT_UTC_DAY}"), PlaceholderType::DateTimeUtcDay},
-            {QStringLiteral("{DT_UTC_HOUR}"), PlaceholderType::DateTimeUtcHour},
-            {QStringLiteral("{DT_UTC_MINUTE}"), PlaceholderType::DateTimeUtcMinute},
-            {QStringLiteral("{DT_UTC_SECOND}"), PlaceholderType::DateTimeUtcSecond},
-            {QStringLiteral("{DB_DIR}"), PlaceholderType::DbDir}};
-
-        const auto parsedPlaceholderType = placeholders.value(placeholder.toUpper(), PlaceholderType::Unknown);
-        if (parsedPlaceholderType == PlaceholderType::Unknown) {
-            // Placeholder is identified, but is inside {} brackets
-            const auto trimmedPlaceholder = placeholder.mid(1, placeholder.length() - 2);
-            return placeholderType(trimmedPlaceholder, maxDepth);
-        }
-        return parsedPlaceholderType;
+        return Placeholders.value(placeholder.toUpper(), PlaceholderType::Unknown);
     }
 
     QString resolveUrlPlaceholder(const QString& str, PlaceholderType placeholderType)
@@ -188,24 +181,11 @@ namespace EntryPlaceholders
 
     bool containsPlaceholder(const QString& str)
     {
-        auto matches = placeholderMatches(str);
-        while (matches.hasNext()) {
-            const auto match = matches.next();
-            auto captured = match.captured(0);
+        QString cleanStr = str;
 
-            // Remove escaped brackets
-            if (captured.startsWith("\\{")) {
-                captured.replace(0, 2, "{");
-            }
-            if (captured.endsWith("\\}")) {
-                captured.replace(captured.size() - 2, 2, "}");
-            }
+        // Remove escaped brackets
+        cleanStr.replace("\\{", "{").replace("\\}", "}");
 
-            const auto placeHolderType = placeholderType(captured);
-            if (placeHolderType != PlaceholderType::NotPlaceholder && placeHolderType != PlaceholderType::Unknown) {
-                return true;
-            }
-        }
-        return false;
+        return cleanStr.toUpper().contains(PlaceholderRegEx) || cleanStr.toUpper().contains(DynamicPlaceholderRegEx);
     }
 } // namespace EntryPlaceholders
